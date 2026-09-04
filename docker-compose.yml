@@ -1,0 +1,110 @@
+version: "3.8"
+
+services:
+  frontend:
+    build: ./frontend
+    container_name: pardo-frontend
+    ports:
+      - "3000:80"
+    environment:
+      - REACT_APP_API_URL=http://localhost:5000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - pardo-network
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    container_name: pardo-backend
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://pardo:pardo2024@postgres:5432/pardodb
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=pardo_secret_key_2024
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - ./storage/uploads:/app/uploads
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - pardo-network
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: pardo-postgres
+    environment:
+      - POSTGRES_DB=pardodb
+      - POSTGRES_USER=pardo
+      - POSTGRES_PASSWORD=pardo2024
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - pardo-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: pardo-redis
+    command: redis-server --appendonly yes --requirepass pardo_redis_2024
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - pardo-network
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:latest
+    container_name: pardo-minio
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_ROOT_USER=pardo_minio
+      - MINIO_ROOT_PASSWORD=pardo_minio_secret
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - pardo-network
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pardo-pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@pardo.com
+      - PGADMIN_DEFAULT_PASSWORD=pardo_admin_2024
+    ports:
+      - "8080:80"
+    depends_on:
+      - postgres
+    networks:
+      - pardo-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    name: pardo_postgres_data
+  redis_data:
+    name: pardo_redis_data
+  minio_data:
+    name: pardo_minio_data
+
+networks:
+  pardo-network:
+    driver: bridge
+    name: pardo_network
