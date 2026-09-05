@@ -1,4 +1,7 @@
 import React from "react";
+import Rachas from "./components/Rachas";
+import DashboardAvanzado from "./components/DashboardAvanzado";
+import RecuperarPassword from "./components/RecuperarPassword";
 import CookieBanner from "./components/CookieBanner";
 import Privacidad from "./components/Privacidad";
 import Terminos from "./components/Terminos";
@@ -81,7 +84,7 @@ function Login() {
                     <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Contraseña" required style={{ width: "100%", padding: "12px", marginBottom: "15px", border: "1px solid #ddd", borderRadius: "5px" }} />
                     <button type="submit" style={{ width: "100%", padding: "12px", background: "#667eea", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer", fontWeight: "bold" }}>Entrar</button>
                 </form>
-                <p style={{ textAlign: "center", marginTop: "15px" }}><Link to="/registro" style={{ color: "#667eea" }}>Registrarse</Link></p>
+                <p style={{ textAlign: "center", marginTop: "15px" }}><Link to="/registro" style={{ color: "#667eea" }}>Registrarse</Link> · <Link to="/recuperar" style={{ color: "#667eea" }}>¿Olvidaste tu contraseña?</Link></p>
             </div>
         </div>
     );
@@ -673,6 +676,8 @@ function MainApp({ user, logout }) {
         { path: "/compras", icon: "🛒", name: "Compras" },
         { path: "/contactos", icon: "📇", name: "Contactos" },
         { path: "/calculadora", icon: "🔢", name: "Calc" },
+        { path: "/rachas", icon: "🔥", name: "Rachas" },
+        { path: "/dashboard", icon: "📊", name: "Dashboard" },
         { path: "/temas", icon: "🎨", name: "Temas" },
         { path: "/asistente", icon: "🤖", name: "IA" }
     ];
@@ -703,18 +708,17 @@ function MainApp({ user, logout }) {
                     <Route path="/compras" element={<Compras darkMode={darkMode} />} />
                     <Route path="/contactos" element={<Contactos darkMode={darkMode} />} />
                     <Route path="/privacidad" element={<Privacidad darkMode={darkMode} />} />
-                    <Route path="/terminos" element={<Terminos darkMode={darkMode} />} />
                     <Route path="/cookies" element={<Privacidad darkMode={darkMode} />} />
-                                        <Route path="/temas" element={<Temas darkMode={darkMode} />} />
-                    <Route path="/asistente" element={<Asistente darkMode={darkMode} />} />
-                    <Route path="/privacidad" element={<Privacidad darkMode={darkMode} />} />
                     <Route path="/terminos" element={<Terminos darkMode={darkMode} />} />
                     <Route path="/temas" element={<Temas darkMode={darkMode} />} />
                     <Route path="/asistente" element={<Asistente darkMode={darkMode} />} />
+                    <Route path="/recuperar" element={<RecuperarPassword darkMode={darkMode} />} />
+                    <Route path="/dashboard" element={<DashboardAvanzado darkMode={darkMode} />} />
+                    <Route path="/rachas" element={<Rachas darkMode={darkMode} />} />
                     <Route path="/calculadora" element={<Calculadora darkMode={darkMode} />} />
                 </Routes>
+            </div>
             <CookieBanner darkMode={darkMode} />
-            <CookieBanner />
             <Footer />
         </div>
     );
