@@ -1,22 +1,10 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from "react-router-dom";
-import Footer from "./components/Footer";
-import Navigation from "./components/Navigation";
-import InstallPWA from "./components/InstallPWA";
-import Diario from "./components/Diario";
-import Habitos from "./components/Habitos";
-import Deseos from "./components/Deseos";
-import SpotifyPlayer from "./components/SpotifyPlayer";
-import Logros from "./components/Logros";
-import DarkModeToggle from "./components/DarkModeToggle";
-import Estadisticas from "./components/Estadisticas";
-import ExportData from "./components/ExportData";
-import Configuracion from "./components/Configuracion";
 
 const API = "http://localhost:5000";
 
+// ============ AUTH ============
 const AuthContext = React.createContext(null);
-
 function AuthProvider({ children }) {
     const [user, setUser] = React.useState(null);
     const [loading, setLoading] = React.useState(true);
@@ -42,7 +30,6 @@ function AuthProvider({ children }) {
     const logout = () => { localStorage.removeItem("pardo_token"); setUser(null); };
     return <AuthContext.Provider value={{ user, login, register, logout, loading }}>{children}</AuthContext.Provider>;
 }
-
 function useAuth() { return React.useContext(AuthContext); }
 
 function useLocalStorage(key, initial) {
@@ -54,6 +41,7 @@ function useLocalStorage(key, initial) {
     return [value, setValue];
 }
 
+// ============ LOGIN ============
 function Login() {
     const { login } = useAuth();
     const navigate = useNavigate();
@@ -102,25 +90,117 @@ function Register() {
     );
 }
 
-function PanelHoy({ user }) {
+// ============ FOOTER NEGRO ============
+function Footer() {
+    const [showOwner, setShowOwner] = React.useState(false);
+    return (
+        <footer style={{ background: "#000000", color: "#ffffff", padding: "25px 20px 10px", marginTop: "40px" }}>
+            <div style={{ maxWidth: "900px", margin: "0 auto", textAlign: "center" }}>
+                <button onClick={() => setShowOwner(true)} style={{ padding: "10px 20px", background: "#667eea", color: "#fff", border: "none", borderRadius: "25px", cursor: "pointer", fontSize: "13px", marginBottom: "12px" }}>👤 Propietario</button>
+                <div style={{ display: "flex", justifyContent: "center", gap: "15px", flexWrap: "wrap", marginBottom: "12px", fontSize: "12px" }}>
+                    <a href="https://unique-biscochitos-31bcea.netlify.app/" target="_blank" rel="noopener noreferrer" style={{ color: "#fff", textDecoration: "none" }}>🌐 Manuel Casimiro</a>
+                    <a href="https://thriving-otter-cc1e25.netlify.app/" target="_blank" rel="noopener noreferrer" style={{ color: "#fff", textDecoration: "none" }}>💻 Urukais KLick</a>
+                    <a href="https://rad-dolphin-182dfb.netlify.app/" target="_blank" rel="noopener noreferrer" style={{ color: "#FFD700", textDecoration: "none" }}>✨ Guardianes</a>
+                </div>
+                <p style={{ fontSize: "10px", color: "#888", margin: 0 }}>© {new Date().getFullYear()} Pardo Agenda - Manuel Casimiro Carrasco</p>
+            </div>
+            {showOwner && (
+                <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.9)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 3000, padding: "20px" }} onClick={() => setShowOwner(false)}>
+                    <div style={{ background: "#fff", padding: "25px", borderRadius: "15px", maxWidth: "450px", textAlign: "center", color: "#333" }} onClick={(e) => e.stopPropagation()}>
+                        <button onClick={() => setShowOwner(false)} style={{ float: "right", background: "none", border: "none", fontSize: "20px", cursor: "pointer" }}>✕</button>
+                        <div style={{ fontSize: "50px" }}>👨‍💻</div>
+                        <h3 style={{ color: "#667eea" }}>Manuel Casimiro Carrasco</h3>
+                        <p style={{ color: "#666", fontSize: "13px" }}>Desarrollador Web - Reus, Tarragona</p>
+                    </div>
+                </div>
+            )}
+        </footer>
+    );
+}
+
+// ============ INSTALL PWA ============
+function InstallPWA() {
+    const [isInstalled, setIsInstalled] = React.useState(() => localStorage.getItem("pardo_installed") === "true");
+    const [showInstructions, setShowInstructions] = React.useState(false);
+    
+    const handleInstall = () => {
+        setShowInstructions(!showInstructions);
+    };
+    
+    const markInstalled = () => {
+        setIsInstalled(true);
+        localStorage.setItem("pardo_installed", "true");
+    };
+    
+    if (isInstalled) return null;
+    
+    return (
+        <div style={{ marginTop: "20px", display: "inline-block" }}>
+            <button onClick={handleInstall} style={{ padding: "15px 30px", background: "linear-gradient(135deg, #667eea, #764ba2)", color: "#fff", border: "none", borderRadius: "25px", cursor: "pointer", fontWeight: "bold", fontSize: "15px" }}>
+                📱 Instalar App
+            </button>
+            {showInstructions && (
+                <div style={{ marginTop: "10px", background: "#fff", padding: "15px", borderRadius: "10px", textAlign: "left", fontSize: "12px" }}>
+                    <p><strong>Android:</strong> Menú ⋮ → "Instalar aplicación"</p>
+                    <p><strong>iPhone:</strong> Compartir → "Añadir a pantalla de inicio"</p>
+                    <p><strong>Desktop:</strong> Icono ⊕ en barra de direcciones</p>
+                    <button onClick={markInstalled} style={{ marginTop: "8px", padding: "8px 15px", background: "#4CAF50", color: "#fff", border: "none", borderRadius: "15px", cursor: "pointer", fontSize: "12px" }}>✅ Ya la he instalado</button>
+                </div>
+            )}
+        </div>
+    );
+}
+
+// ============ LOGROS ============
+function Logros() {
+    const [xp] = React.useState(() => parseInt(localStorage.getItem("pardo_xp") || "0"));
+    const achievements = [
+        { icon: "🎯", name: "Primer Paso", desc: "Completa tu primera tarea" },
+        { icon: "📔", name: "Escritor", desc: "Escribe en el diario" },
+        { icon: "✅", name: "Creador", desc: "Crea un hábito" },
+        { icon: "📝", name: "Notero", desc: "Crea una nota" },
+        { icon: "⭐", name: "Soñador", desc: "Añade un deseo" },
+        { icon: "🔥", name: "Racha", desc: "3 días seguidos" },
+        { icon: "🌟", name: "Nivel 5", desc: "Alcanza 100 XP" },
+        { icon: "👑", name: "Leyenda", desc: "Alcanza 500 XP" }
+    ];
+    return (
+        <div style={{ padding: "20px", maxWidth: "700px", margin: "0 auto" }}>
+            <h2 style={{ textAlign: "center" }}>🏆 Logros</h2>
+            <div style={{ background: "linear-gradient(135deg, #667eea, #764ba2)", color: "#fff", padding: "20px", borderRadius: "15px", textAlign: "center", marginBottom: "20px" }}>
+                <div style={{ fontSize: "35px" }}>🐕</div>
+                <h3>{xp} XP Total</h3>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: "10px" }}>
+                {achievements.map((a, i) => (
+                    <div key={i} style={{ background: "#fff", padding: "15px", borderRadius: "10px", textAlign: "center" }}>
+                        <div style={{ fontSize: "30px" }}>{a.icon}</div>
+                        <h4 style={{ fontSize: "13px", margin: "8px 0" }}>{a.name}</h4>
+                        <p style={{ fontSize: "11px", color: "#666" }}>{a.desc}</p>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+// ============ HOME CON INSTALL ============
+function Home({ user }) {
     const [tasks] = useLocalStorage("pardo_calendar", {});
     const [habits] = useLocalStorage("pardo_habits", []);
     const [diary] = useLocalStorage("pardo_diary", []);
-    const today = new Date();
-    const todayKey = today.getFullYear() + "-" + String(today.getMonth()+1).padStart(2,"0") + "-" + String(today.getDate()).padStart(2,"0");
-    const todayTasks = tasks[todayKey] || [];
+    const greeting = new Date().getHours() < 12 ? "Buenos días" : new Date().getHours() < 20 ? "Buenas tardes" : "Buenas noches";
     return (
-        <div style={{ padding: "25px", maxWidth: "800px", margin: "0 auto" }}>
-            <div style={{ textAlign: "center", marginBottom: "25px" }}>
-                <div style={{ fontSize: "60px" }}>🐕</div>
-                <h1>¡Hola {user?.username}!</h1>
-                <p style={{ color: "#666" }}>Tienes {todayTasks.length} tareas hoy</p>
+        <div style={{ padding: "25px", textAlign: "center", maxWidth: "700px", margin: "0 auto" }}>
+            <div style={{ fontSize: "70px" }}>🐕</div>
+            <h1>{greeting}, {user?.username}!</h1>
+            <p style={{ color: "#666" }}>Tienes {Object.keys(tasks).length} días con tareas, {habits.length} hábitos, {diary.length} entradas de diario</p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "10px", marginTop: "20px" }}>
+                <div style={{ background: "#667eea", color: "#fff", padding: "15px", borderRadius: "10px" }}><div style={{ fontSize: "25px", fontWeight: "bold" }}>{Object.keys(tasks).length}</div><div style={{ fontSize: "11px" }}>Días con tareas</div></div>
+                <div style={{ background: "#4CAF50", color: "#fff", padding: "15px", borderRadius: "10px" }}><div style={{ fontSize: "25px", fontWeight: "bold" }}>{habits.length}</div><div style={{ fontSize: "11px" }}>Hábitos</div></div>
+                <div style={{ background: "#FF9800", color: "#fff", padding: "15px", borderRadius: "10px" }}><div style={{ fontSize: "25px", fontWeight: "bold" }}>{diary.length}</div><div style={{ fontSize: "11px" }}>Diario</div></div>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "12px" }}>
-                <div style={{ background: "#667eea", color: "#fff", padding: "20px", borderRadius: "10px", textAlign: "center" }}><div style={{ fontSize: "28px", fontWeight: "bold" }}>{todayTasks.length}</div><div style={{ fontSize: "12px" }}>Tareas hoy</div></div>
-                <div style={{ background: "#4CAF50", color: "#fff", padding: "20px", borderRadius: "10px", textAlign: "center" }}><div style={{ fontSize: "28px", fontWeight: "bold" }}>{habits.length}</div><div style={{ fontSize: "12px" }}>Hábitos</div></div>
-                <div style={{ background: "#FF9800", color: "#fff", padding: "20px", borderRadius: "10px", textAlign: "center" }}><div style={{ fontSize: "28px", fontWeight: "bold" }}>{diary.length}</div><div style={{ fontSize: "12px" }}>Diario</div></div>
-            </div>
+            <InstallPWA />
         </div>
     );
 }
@@ -141,15 +221,8 @@ function Calendario() {
     for (let d = 1; d <= daysInMonth; d++) {
         const isToday = d === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear();
         const dateKey = year + "-" + String(month+1).padStart(2,"0") + "-" + String(d).padStart(2,"0");
-        const dayTasks = tasks[dateKey] || [];
-        days.push(<div key={d} onClick={() => setSelectedDate(dateKey)} style={{ padding: "10px", textAlign: "center", background: isToday ? "#667eea" : "#fff", color: isToday ? "#fff" : "#333", borderRadius: "5px", border: dayTasks.length > 0 ? "2px solid #4CAF50" : "1px solid #ddd", cursor: "pointer" }}>{d}</div>);
+        days.push(<div key={d} onClick={() => setSelectedDate(dateKey)} style={{ padding: "10px", textAlign: "center", background: isToday ? "#667eea" : "#fff", color: isToday ? "#fff" : "#333", borderRadius: "5px", border: "1px solid #ddd", cursor: "pointer" }}>{d}</div>);
     }
-    const deleteTask = (dateKey, index) => {
-        const updated = { ...tasks };
-        updated[dateKey] = updated[dateKey].filter((_, i) => i !== index);
-        if (updated[dateKey].length === 0) delete updated[dateKey];
-        setTasks(updated);
-    };
     return (
         <div style={{ padding: "20px", maxWidth: "850px", margin: "0 auto" }}>
             <h2 style={{ textAlign: "center" }}>📅 Calendario</h2>
@@ -159,24 +232,52 @@ function Calendario() {
                 <button onClick={() => setCurrentDate(new Date(year, month + 1, 1))} style={{ padding: "8px 15px", border: "none", background: "#667eea", color: "#fff", borderRadius: "5px", cursor: "pointer" }}>→</button>
             </div>
             <div style={{ background: "#fff", padding: "15px", borderRadius: "10px" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "5px", marginBottom: "8px" }}>{daysOfWeek.map(d => <div key={d} style={{ textAlign: "center", fontWeight: "bold", fontSize: "12px" }}>{d}</div>)}</div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "5px" }}>{daysOfWeek.map(d => <div key={d} style={{ textAlign: "center", fontWeight: "bold", fontSize: "12px" }}>{d}</div>)}</div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "5px" }}>{days}</div>
             </div>
             {selectedDate && (
                 <div style={{ background: "#fff", padding: "15px", borderRadius: "10px", marginTop: "15px" }}>
-                    <h3>📋 Tareas del {selectedDate}</h3>
-                    {(tasks[selectedDate] || []).map((t, i) => (
-                        <div key={i} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px", borderBottom: "1px solid #f0f0f0" }}>
-                            <span style={{ flex: 1 }}>{t}</span>
-                            <button onClick={() => deleteTask(selectedDate, i)} style={{ background: "#dc3545", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer", padding: "5px 10px" }}>🗑️</button>
-                        </div>
-                    ))}
-                    <div style={{ display: "flex", gap: "8px", marginTop: "10px" }}>
-                        <input type="text" value={newTask} onChange={(e) => setNewTask(e.target.value)} placeholder="Nueva tarea..." style={{ flex: 1, padding: "8px", border: "1px solid #ddd", borderRadius: "5px" }} />
-                        <button onClick={() => { if (newTask) { setTasks({ ...tasks, [selectedDate]: [...(tasks[selectedDate] || []), newTask] }); setNewTask(""); } }} style={{ padding: "8px 15px", background: "#4CAF50", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer" }}>➕</button>
-                    </div>
+                    <h3>📋 {selectedDate}</h3>
+                    {(tasks[selectedDate] || []).map((t, i) => <div key={i} style={{ display: "flex", gap: "8px", padding: "8px" }}><span style={{ flex: 1 }}>{t}</span><button onClick={() => { const updated = { ...tasks }; updated[selectedDate] = updated[selectedDate].filter((_, x) => x !== i); setTasks(updated); }} style={{ background: "#dc3545", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer" }}>🗑️</button></div>)}
+                    <div style={{ display: "flex", gap: "8px", marginTop: "10px" }}><input value={newTask} onChange={(e) => setNewTask(e.target.value)} placeholder="Nueva tarea..." style={{ flex: 1, padding: "8px", border: "1px solid #ddd", borderRadius: "5px" }} /><button onClick={() => { if (newTask) { setTasks({ ...tasks, [selectedDate]: [...(tasks[selectedDate] || []), newTask] }); setNewTask(""); } }} style={{ padding: "8px 15px", background: "#4CAF50", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer" }}>➕</button></div>
                 </div>
             )}
+        </div>
+    );
+}
+
+function Diario() {
+    const [entries, setEntries] = useLocalStorage("pardo_diary", []);
+    const [title, setTitle] = React.useState("");
+    const [content, setContent] = React.useState("");
+    const [mood, setMood] = React.useState("😊");
+    const moods = ["😊", "😢", "😴", "😡", "🤗", "😰", "🤩", "😌"];
+    return (
+        <div style={{ padding: "20px", maxWidth: "700px", margin: "0 auto" }}>
+            <h2 style={{ textAlign: "center" }}>📔 Mi Diario</h2>
+            <div style={{ background: "#fff", padding: "15px", borderRadius: "10px", marginBottom: "15px" }}>
+                <input type="text" placeholder="Título" value={title} onChange={(e) => setTitle(e.target.value)} style={{ width: "100%", padding: "10px", marginBottom: "8px", border: "1px solid #ddd", borderRadius: "5px" }} />
+                <div style={{ display: "flex", gap: "5px", marginBottom: "8px" }}>{moods.map(m => <button key={m} onClick={() => setMood(m)} style={{ fontSize: "22px", background: "none", border: m === mood ? "2px solid #667eea" : "none", borderRadius: "50%", cursor: "pointer" }}>{m}</button>)}</div>
+                <textarea placeholder="Escribe..." value={content} onChange={(e) => setContent(e.target.value)} style={{ width: "100%", padding: "10px", minHeight: "80px", border: "1px solid #ddd", borderRadius: "5px", marginBottom: "8px" }} />
+                <button onClick={() => { if (title && content) { setEntries([{ id: Date.now(), title, content, mood, date: new Date().toLocaleDateString("es-ES") }, ...entries]); setTitle(""); setContent(""); } }} style={{ padding: "10px 20px", background: "#667eea", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer" }}>💾 Guardar</button>
+            </div>
+            {entries.map(e => <div key={e.id} style={{ background: "#fff", padding: "15px", borderRadius: "10px", marginBottom: "10px", borderLeft: "4px solid #fcb69f", position: "relative" }}><button onClick={() => setEntries(entries.filter(x => x.id !== e.id))} style={{ position: "absolute", top: "10px", right: "10px", background: "#dc3545", color: "#fff", border: "none", borderRadius: "50%", width: "28px", height: "28px", cursor: "pointer" }}>🗑️</button><h3 style={{ fontSize: "15px", marginRight: "40px" }}>{e.mood} {e.title}</h3><p style={{ fontSize: "13px", fontStyle: "italic" }}>{e.content}</p><small style={{ color: "#999" }}>{e.date}</small></div>)}
+        </div>
+    );
+}
+
+function Habitos() {
+    const [habits, setHabits] = useLocalStorage("pardo_habits", []);
+    const [newHabit, setNewHabit] = React.useState("");
+    const daysOfWeek = ["L", "M", "X", "J", "V", "S", "D"];
+    return (
+        <div style={{ padding: "20px", maxWidth: "700px", margin: "0 auto" }}>
+            <h2 style={{ textAlign: "center" }}>✅ Hábitos</h2>
+            <div style={{ display: "flex", gap: "8px", marginBottom: "15px" }}>
+                <input type="text" placeholder="Nuevo hábito..." value={newHabit} onChange={(e) => setNewHabit(e.target.value)} style={{ flex: 1, padding: "10px", border: "1px solid #ddd", borderRadius: "5px" }} />
+                <button onClick={() => { if (newHabit) { setHabits([...habits, { id: Date.now(), name: newHabit, icon: "⭐", days: [false,false,false,false,false,false,false] }]); setNewHabit(""); } }} style={{ padding: "10px 15px", background: "#4CAF50", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer" }}>➕</button>
+            </div>
+            {habits.map(h => <div key={h.id} style={{ background: "#fff", padding: "12px", borderRadius: "10px", marginBottom: "8px", display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}><span>{h.icon}</span><span style={{ flex: 1, fontWeight: "bold", fontSize: "14px" }}>{h.name}</span><div style={{ display: "flex", gap: "4px" }}>{h.days.map((done, i) => <button key={i} onClick={() => setHabits(habits.map(x => x.id === h.id ? { ...x, days: x.days.map((d, di) => di === i ? !d : d) } : x))} style={{ width: "26px", height: "26px", borderRadius: "50%", border: "2px solid #667eea", background: done ? "#667eea" : "#fff", color: done ? "#fff" : "#667eea", cursor: "pointer", fontSize: "9px" }}>{daysOfWeek[i]}</button>)}</div><button onClick={() => setHabits(habits.filter(x => x.id !== h.id))} style={{ background: "#dc3545", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer", padding: "5px 8px" }}>🗑️</button></div>)}
         </div>
     );
 }
@@ -184,21 +285,29 @@ function Calendario() {
 function Notas() {
     const [notes, setNotes] = useLocalStorage("pardo_notes", []);
     const [newNote, setNewNote] = React.useState("");
-    const [color, setColor] = React.useState("#FFF9C4");
-    const colors = ["#FFF9C4", "#FFCCBC", "#C8E6C9", "#BBDEFB", "#F8BBD0", "#D1C4E9", "#FFE0B2", "#B2DFDB"];
     return (
         <div style={{ padding: "20px", maxWidth: "700px", margin: "0 auto" }}>
             <h2 style={{ textAlign: "center" }}>📝 Notas</h2>
-            <div style={{ background: "#fff", padding: "15px", borderRadius: "10px", marginBottom: "15px" }}>
-                <textarea placeholder="Escribe una nota..." value={newNote} onChange={(e) => setNewNote(e.target.value)} style={{ width: "100%", padding: "10px", minHeight: "70px", border: "1px solid #ddd", borderRadius: "5px", marginBottom: "8px" }} />
-                <div style={{ display: "flex", gap: "5px", flexWrap: "wrap" }}>
-                    {colors.map(c => <button key={c} onClick={() => setColor(c)} style={{ width: "25px", height: "25px", borderRadius: "50%", background: c, border: color === c ? "2px solid #333" : "1px solid #ddd", cursor: "pointer" }}></button>)}
-                    <button onClick={() => { if (newNote) { setNotes([{ id: Date.now(), text: newNote, color }, ...notes]); setNewNote(""); } }} style={{ marginLeft: "auto", padding: "8px 15px", background: "#667eea", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer" }}>➕</button>
-                </div>
+            <div style={{ display: "flex", gap: "8px", marginBottom: "15px" }}>
+                <textarea value={newNote} onChange={(e) => setNewNote(e.target.value)} placeholder="Escribe una nota..." style={{ flex: 1, padding: "10px", minHeight: "70px", border: "1px solid #ddd", borderRadius: "5px" }} />
+                <button onClick={() => { if (newNote) { setNotes([{ id: Date.now(), text: newNote }, ...notes]); setNewNote(""); } }} style={{ padding: "10px 15px", background: "#667eea", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer" }}>➕</button>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: "10px" }}>
-                {notes.map(n => <div key={n.id} style={{ background: n.color, padding: "12px", borderRadius: "8px", minHeight: "100px", position: "relative" }}><button onClick={() => setNotes(notes.filter(x => x.id !== n.id))} style={{ position: "absolute", top: "5px", right: "5px", background: "#dc3545", color: "#fff", border: "none", borderRadius: "50%", width: "24px", height: "24px", cursor: "pointer" }}>✕</button><p style={{ fontSize: "13px" }}>{n.text}</p></div>)}
+            {notes.map(n => <div key={n.id} style={{ background: "#fff", padding: "12px", borderRadius: "8px", marginBottom: "8px", position: "relative" }}><button onClick={() => setNotes(notes.filter(x => x.id !== n.id))} style={{ position: "absolute", top: "5px", right: "5px", background: "#dc3545", color: "#fff", border: "none", borderRadius: "50%", width: "24px", height: "24px", cursor: "pointer" }}>✕</button><p>{n.text}</p></div>)}
+        </div>
+    );
+}
+
+function Deseos() {
+    const [wishes, setWishes] = useLocalStorage("pardo_wishes", []);
+    const [newWish, setNewWish] = React.useState("");
+    return (
+        <div style={{ padding: "20px", maxWidth: "700px", margin: "0 auto" }}>
+            <h2 style={{ textAlign: "center" }}>⭐ Deseos</h2>
+            <div style={{ display: "flex", gap: "8px", marginBottom: "15px" }}>
+                <input type="text" placeholder="Añadir deseo..." value={newWish} onChange={(e) => setNewWish(e.target.value)} style={{ flex: 1, padding: "10px", border: "1px solid #ddd", borderRadius: "5px" }} />
+                <button onClick={() => { if (newWish) { setWishes([{ id: Date.now(), text: newWish, done: false }, ...wishes]); setNewWish(""); } }} style={{ padding: "10px 15px", background: "#FF9800", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer" }}>➕</button>
             </div>
+            {wishes.map(w => <div key={w.id} style={{ background: "#fff", padding: "10px", borderRadius: "8px", marginBottom: "8px", display: "flex", alignItems: "center", gap: "8px" }}><input type="checkbox" checked={w.done} onChange={() => setWishes(wishes.map(x => x.id === w.id ? { ...x, done: !x.done } : x))} /><span style={{ flex: 1 }}>{w.text}</span><button onClick={() => setWishes(wishes.filter(x => x.id !== w.id))} style={{ background: "#dc3545", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer", padding: "5px 8px" }}>🗑️</button></div>)}
         </div>
     );
 }
@@ -207,9 +316,7 @@ function Frases() {
     const quotes = [
         { text: "La disciplina es el puente entre metas y logros", author: "Jim Rohn", icon: "🎯" },
         { text: "El éxito es la suma de pequeños esfuerzos", author: "Robert Collier", icon: "💪" },
-        { text: "No cuentes los días, haz que cuenten", author: "Muhammad Ali", icon: "📅" },
-        { text: "El futuro se crea", author: "Peter Drucker", icon: "🔮" },
-        { text: "Cada día es una nueva oportunidad", author: "Anónimo", icon: "🌅" }
+        { text: "No cuentes los días, haz que cuenten", author: "Muhammad Ali", icon: "📅" }
     ];
     const [current, setCurrent] = React.useState(0);
     return (
@@ -226,10 +333,8 @@ function Servicios() {
         { name: "Drive", icon: "📁", url: "https://drive.google.com", color: "#4285F4" },
         { name: "Calendar", icon: "📅", url: "https://calendar.google.com", color: "#34A853" },
         { name: "Gmail", icon: "📧", url: "https://mail.google.com", color: "#EA4335" },
-        { name: "Maps", icon: "🗺️", url: "https://maps.google.com", color: "#FBBC05" },
         { name: "YouTube", icon: "▶️", url: "https://youtube.com", color: "#FF0000" },
         { name: "Spotify", icon: "🎵", url: "https://spotify.com", color: "#1DB954" },
-        { name: "Wikipedia", icon: "📚", url: "https://wikipedia.org", color: "#000" },
         { name: "ChatGPT", icon: "🤖", url: "https://chat.openai.com", color: "#10A37F" }
     ];
     return (
@@ -242,41 +347,56 @@ function Servicios() {
     );
 }
 
-function Ajustes() {
-    const [soundOn, setSoundOn] = React.useState(true);
-    const [notifOn, setNotifOn] = React.useState(true);
-    const [showPardo, setShowPardo] = React.useState(true);
-    return (
-        <div style={{ padding: "20px", maxWidth: "600px", margin: "0 auto" }}>
-            <h2 style={{ textAlign: "center" }}>⚙️ Ajustes</h2>
-            <div style={{ background: "#fff", padding: "15px", borderRadius: "10px", marginBottom: "10px", display: "flex", justifyContent: "space-between" }}><span>🔊 Sonidos</span><button onClick={() => setSoundOn(!soundOn)} style={{ width: "50px", height: "26px", borderRadius: "13px", background: soundOn ? "#4CAF50" : "#ccc", border: "none", cursor: "pointer" }}><div style={{ width: "22px", height: "22px", borderRadius: "50%", background: "#fff", marginLeft: soundOn ? "26px" : "2px" }} /></button></div>
-            <div style={{ background: "#fff", padding: "15px", borderRadius: "10px", marginBottom: "10px", display: "flex", justifyContent: "space-between" }}><span>🔔 Notificaciones</span><button onClick={() => setNotifOn(!notifOn)} style={{ width: "50px", height: "26px", borderRadius: "13px", background: notifOn ? "#4CAF50" : "#ccc", border: "none", cursor: "pointer" }}><div style={{ width: "22px", height: "22px", borderRadius: "50%", background: "#fff", marginLeft: notifOn ? "26px" : "2px" }} /></button></div>
-            <div style={{ background: "#fff", padding: "15px", borderRadius: "10px", marginBottom: "10px", display: "flex", justifyContent: "space-between" }}><span>🐕 Mostrar Pardo</span><button onClick={() => setShowPardo(!showPardo)} style={{ width: "50px", height: "26px", borderRadius: "13px", background: showPardo ? "#4CAF50" : "#ccc", border: "none", cursor: "pointer" }}><div style={{ width: "22px", height: "22px", borderRadius: "50%", background: "#fff", marginLeft: showPardo ? "26px" : "2px" }} /></button></div>
-        </div>
-    );
-}
-
 function MainApp({ user, logout }) {
+    const [isMobile, setIsMobile] = React.useState(window.innerWidth < 768);
+    const [menuOpen, setMenuOpen] = React.useState(false);
+    const menu = [
+        { path: "/", icon: "🏠", name: "Hoy" },
+        { path: "/calendario", icon: "📅", name: "Calendario" },
+        { path: "/diario", icon: "📔", name: "Diario" },
+        { path: "/habitos", icon: "✅", name: "Hábitos" },
+        { path: "/notas", icon: "📝", name: "Notas" },
+        { path: "/deseos", icon: "⭐", name: "Deseos" },
+        { path: "/logros", icon: "🏆", name: "Logros" },
+        { path: "/frases", icon: "💬", name: "Frases" },
+        { path: "/servicios", icon: "🔧", name: "Servicios" }
+    ];
     return (
         <div style={{ minHeight: "100vh", background: "#f5f5f5", fontFamily: "Arial", display: "flex", flexDirection: "column" }}>
-            <Navigation user={user} logout={logout} />
+            <nav style={{ background: "#fff", padding: "10px 15px", boxShadow: "0 2px 4px rgba(0,0,0,0.1)", position: "sticky", top: 0, zIndex: 100 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <Link to="/" style={{ fontSize: "20px", fontWeight: "bold", color: "#667eea", textDecoration: "none" }}>🐕 Pardo</Link>
+                    {isMobile ? (
+                        <button onClick={() => setMenuOpen(!menuOpen)} style={{ fontSize: "24px", background: "none", border: "none", cursor: "pointer" }}>{menuOpen ? "✕" : "☰"}</button>
+                    ) : (
+                        <div style={{ display: "flex", gap: "5px", flexWrap: "wrap" }}>
+                            {menu.map(m => <Link key={m.path} to={m.path} style={{ padding: "7px 10px", borderRadius: "20px", textDecoration: "none", color: "#333", background: "#f0f0f0", fontSize: "12px" }}>{m.icon} {m.name}</Link>)}
+                        </div>
+                    )}
+                    <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                        <span style={{ fontSize: "12px" }}>👤 {user?.username}</span>
+                        <button onClick={logout} style={{ padding: "5px 10px", background: "#f44336", color: "#fff", border: "none", borderRadius: "15px", cursor: "pointer", fontSize: "11px" }}>Salir</button>
+                    </div>
+                </div>
+                {isMobile && menuOpen && (
+                    <div style={{ marginTop: "10px", display: "flex", flexDirection: "column", gap: "5px" }}>
+                        {menu.map(m => <Link key={m.path} to={m.path} onClick={() => setMenuOpen(false)} style={{ padding: "10px 15px", borderRadius: "8px", textDecoration: "none", color: "#333", background: "#f8f9fa", fontSize: "14px" }}>{m.icon} {m.name}</Link>)}
+                    </div>
+                )}
+            </nav>
             <div style={{ flex: 1, padding: "20px" }}>
                 <Routes>
-                    <Route path="/" element={<PanelHoy user={user} />} />
+                    <Route path="/" element={<Home user={user} />} />
                     <Route path="/calendario" element={<Calendario />} />
                     <Route path="/diario" element={<Diario />} />
                     <Route path="/habitos" element={<Habitos />} />
                     <Route path="/notas" element={<Notas />} />
                     <Route path="/deseos" element={<Deseos />} />
-                    <Route path="/frases" element={<Frases />} />
                     <Route path="/logros" element={<Logros />} />
-                    <Route path="/estadisticas" element={<Estadisticas />} />
+                    <Route path="/frases" element={<Frases />} />
                     <Route path="/servicios" element={<Servicios />} />
-                    <Route path="/exportar" element={<ExportData />} />
-                    <Route path="/ajustes" element={<Ajustes />} />
                 </Routes>
             </div>
-            <InstallPWA />
             <Footer />
         </div>
     );
