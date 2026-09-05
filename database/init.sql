@@ -1,58 +1,105 @@
--- Extensions
+-- Extensiones
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
--- Users Table
+-- Usuarios
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     username VARCHAR(50) UNIQUE NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     full_name VARCHAR(100),
-    timezone VARCHAR(50) DEFAULT "UTC",
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    timezone VARCHAR(50) DEFAULT 'UTC',
+    email_verified BOOLEAN DEFAULT false,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Categories Table
-CREATE TABLE IF NOT EXISTS categories (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    name VARCHAR(50) NOT NULL,
-    icon VARCHAR(50),
-    color VARCHAR(7),
-    is_default BOOLEAN DEFAULT false,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Tasks Table
+-- Tareas del calendario
 CREATE TABLE IF NOT EXISTS tasks (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    category_id UUID REFERENCES categories(id) ON DELETE SET NULL,
     title VARCHAR(200) NOT NULL,
     description TEXT,
-    due_date TIMESTAMP,
+    due_date DATE NOT NULL,
+    due_time TIME,
+    category VARCHAR(50),
     priority INTEGER DEFAULT 1,
-    status VARCHAR(20) DEFAULT "pending",
-    completed_at TIMESTAMP,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    completed BOOLEAN DEFAULT false,
+    recurring BOOLEAN DEFAULT false,
+    reminder_time TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Pardo States Table
-CREATE TABLE IF NOT EXISTS pardo_states (
+-- Notas
+CREATE TABLE IF NOT EXISTS notes (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    happiness INTEGER DEFAULT 100,
-    energy INTEGER DEFAULT 100,
-    hunger INTEGER DEFAULT 0,
-    level INTEGER DEFAULT 1,
-    experience INTEGER DEFAULT 0,
-    mood VARCHAR(20) DEFAULT "happy",
+    text TEXT NOT NULL,
+    color VARCHAR(7) DEFAULT '#FFF9C4',
+    category VARCHAR(50) DEFAULT '📝 General',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Entradas de diario
+CREATE TABLE IF NOT EXISTS diary_entries (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    title VARCHAR(200) NOT NULL,
+    content TEXT NOT NULL,
+    mood VARCHAR(20) DEFAULT '😊',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Hábitos
+CREATE TABLE IF NOT EXISTS habits (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    name VARCHAR(100) NOT NULL,
+    icon VARCHAR(10) DEFAULT '⭐',
+    days JSONB DEFAULT '[false,false,false,false,false,false,false]',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Deseos
+CREATE TABLE IF NOT EXISTS wishes (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    text VARCHAR(200) NOT NULL,
+    category VARCHAR(20) DEFAULT '🌟',
+    done BOOLEAN DEFAULT false,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Refresh tokens
+CREATE TABLE IF NOT EXISTS refresh_tokens (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    token_hash VARCHAR(255) NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    revoked BOOLEAN DEFAULT false,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Indexes
-CREATE INDEX IF NOT EXISTS idx_tasks_user_id ON tasks(user_id);
-CREATE INDEX IF NOT EXISTS idx_tasks_due_date ON tasks(due_date);
-CREATE INDEX IF NOT EXISTS idx_categories_user ON categories(user_id);
-CREATE INDEX IF NOT EXISTS idx_pardo_user ON pardo_states(user_id);
+-- Papelera
+CREATE TABLE IF NOT EXISTS trash (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    item_type VARCHAR(50) NOT NULL,
+    item_data JSONB NOT NULL,
+    deleted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Índices
+CREATE INDEX IF NOT EXISTS idx_tasks_user_date ON tasks(user_id, due_date);
+CREATE INDEX IF NOT EXISTS idx_notes_user ON notes(user_id);
+CREATE INDEX IF NOT EXISTS idx_diary_user ON diary_entries(user_id);
+CREATE INDEX IF NOT EXISTS idx_habits_user ON habits(user_id);
+CREATE INDEX IF NOT EXISTS idx_wishes_user ON wishes(user_id);
+CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user ON refresh_tokens(user_id);
+CREATE INDEX IF NOT EXISTS idx_trash_user ON trash(user_id);

@@ -4,52 +4,31 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 require("dotenv").config();
 
+const authRoutes = require("./routes/auth.routes");
 const tasksRoutes = require("./routes/tasks.routes");
-const categoriesRoutes = require("./routes/categories.routes");
-const pardoRoutes = require("./routes/pardo.routes");
+const notesRoutes = require("./routes/notes.routes");
+const diaryRoutes = require("./routes/diary.routes");
+const habitsRoutes = require("./routes/habits.routes");
+const wishesRoutes = require("./routes/wishes.routes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
 app.use(helmet());
-app.use(cors());
+app.use(cors({ origin: "*", methods: "GET,HEAD,PUT,PATCH,POST,DELETE" }));
 app.use(morgan("dev"));
 app.use(express.json());
 
 // Routes
+app.use("/api/auth", authRoutes);
 app.use("/api/tasks", tasksRoutes);
-app.use("/api/categories", categoriesRoutes);
-app.use("/api/pardo", pardoRoutes);
+app.use("/api/notes", notesRoutes);
+app.use("/api/diary", diaryRoutes);
+app.use("/api/habits", habitsRoutes);
+app.use("/api/wishes", wishesRoutes);
 
-// Health check
 app.get("/health", (req, res) => {
-    res.json({ 
-        status: "OK", 
-        service: "Pardo Agenda API",
-        timestamp: new Date().toISOString(),
-        pardo: "🐕"
-    });
-});
-
-// Welcome route
-app.get("/", (req, res) => {
-    res.json({
-        message: "🐕 Pardo Agenda API",
-        version: "1.0.0",
-        endpoints: {
-            health: "/health",
-            tasks: "/api/tasks",
-            categories: "/api/categories",
-            pardo: "/api/pardo"
-        }
-    });
-});
-
-// Error handling
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({ error: "Something went wrong!" });
+    res.json({ status: "OK", service: "Pardo Agenda API", pardo: "🐕" });
 });
 
 app.listen(PORT, () => {

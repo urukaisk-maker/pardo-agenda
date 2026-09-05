@@ -96,6 +96,19 @@ services:
       - pardo-network
     restart: unless-stopped
 
+  adminer:
+    image: adminer:latest
+    container_name: pardo-adminer
+    ports:
+      - "8081:8080"
+    environment:
+      - ADMINER_DEFAULT_SERVER=postgres
+    depends_on:
+      - postgres
+    networks:
+      - pardo-network
+    restart: unless-stopped
+
 volumes:
   postgres_data:
     name: pardo_postgres_data
