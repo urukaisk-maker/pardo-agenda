@@ -1,7 +1,30 @@
 import React from "react";
+import CookieBanner from "./components/CookieBanner";
+import Privacidad from "./components/Privacidad";
+import Terminos from "./components/Terminos";
+import LogrosAvanzados from "./components/LogrosAvanzados";
+import Temas from "./components/Temas";
+import Asistente from "./components/Asistente";
+import Navigation from "./components/Navigation";
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from "react-router-dom";
 
 const API = "http://localhost:5000";
+
+// ============ SPLASH SCREEN ============
+function SplashScreen() {
+    const [show, setShow] = React.useState(true);
+    React.useEffect(() => {
+        setTimeout(() => setShow(false), 2000);
+    }, []);
+    if (!show) return null;
+    return (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "linear-gradient(135deg, #667eea, #764ba2)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", zIndex: 5000, animation: "fadeOut 0.5s 1.5s forwards" }}>
+            <div style={{ fontSize: "100px", animation: "bounce 1s infinite" }}>🐕</div>
+            <h1 style={{ color: "#fff", fontSize: "28px", marginTop: "20px" }}>Pardo Agenda</h1>
+            <p style={{ color: "rgba(255,255,255,0.8)", fontSize: "14px" }}>Tu mascota virtual</p>
+        </div>
+    );
+}
 
 // ============ AUTH ============
 const AuthContext = React.createContext(null);
@@ -41,7 +64,6 @@ function useLocalStorage(key, initial) {
     return [value, setValue];
 }
 
-// ============ LOGIN ============
 function Login() {
     const { login } = useAuth();
     const navigate = useNavigate();
@@ -90,7 +112,7 @@ function Register() {
     );
 }
 
-// ============ FOOTER NEGRO ============
+// ============ FOOTER ============
 function Footer() {
     const [showOwner, setShowOwner] = React.useState(false);
     return (
@@ -105,7 +127,7 @@ function Footer() {
                 <p style={{ fontSize: "10px", color: "#888", margin: 0 }}>© {new Date().getFullYear()} Pardo Agenda - Manuel Casimiro Carrasco</p>
             </div>
             {showOwner && (
-                <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.9)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 3000, padding: "20px" }} onClick={() => setShowOwner(false)}>
+                <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.9)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 3000 }} onClick={() => setShowOwner(false)}>
                     <div style={{ background: "#fff", padding: "25px", borderRadius: "15px", maxWidth: "450px", textAlign: "center", color: "#333" }} onClick={(e) => e.stopPropagation()}>
                         <button onClick={() => setShowOwner(false)} style={{ float: "right", background: "none", border: "none", fontSize: "20px", cursor: "pointer" }}>✕</button>
                         <div style={{ fontSize: "50px" }}>👨‍💻</div>
@@ -122,89 +144,145 @@ function Footer() {
 function InstallPWA() {
     const [isInstalled, setIsInstalled] = React.useState(() => localStorage.getItem("pardo_installed") === "true");
     const [showInstructions, setShowInstructions] = React.useState(false);
-    
-    const handleInstall = () => {
-        setShowInstructions(!showInstructions);
-    };
-    
-    const markInstalled = () => {
-        setIsInstalled(true);
-        localStorage.setItem("pardo_installed", "true");
-    };
-    
     if (isInstalled) return null;
-    
     return (
         <div style={{ marginTop: "20px", display: "inline-block" }}>
-            <button onClick={handleInstall} style={{ padding: "15px 30px", background: "linear-gradient(135deg, #667eea, #764ba2)", color: "#fff", border: "none", borderRadius: "25px", cursor: "pointer", fontWeight: "bold", fontSize: "15px" }}>
-                📱 Instalar App
-            </button>
+            <button onClick={() => setShowInstructions(!showInstructions)} style={{ padding: "15px 30px", background: "linear-gradient(135deg, #667eea, #764ba2)", color: "#fff", border: "none", borderRadius: "25px", cursor: "pointer", fontWeight: "bold", fontSize: "15px" }}>📱 Instalar App</button>
             {showInstructions && (
                 <div style={{ marginTop: "10px", background: "#fff", padding: "15px", borderRadius: "10px", textAlign: "left", fontSize: "12px" }}>
                     <p><strong>Android:</strong> Menú ⋮ → "Instalar aplicación"</p>
                     <p><strong>iPhone:</strong> Compartir → "Añadir a pantalla de inicio"</p>
                     <p><strong>Desktop:</strong> Icono ⊕ en barra de direcciones</p>
-                    <button onClick={markInstalled} style={{ marginTop: "8px", padding: "8px 15px", background: "#4CAF50", color: "#fff", border: "none", borderRadius: "15px", cursor: "pointer", fontSize: "12px" }}>✅ Ya la he instalado</button>
+                    <button onClick={() => { setIsInstalled(true); localStorage.setItem("pardo_installed", "true"); }} style={{ marginTop: "8px", padding: "8px 15px", background: "#4CAF50", color: "#fff", border: "none", borderRadius: "15px", cursor: "pointer", fontSize: "12px" }}>✅ Ya la he instalado</button>
                 </div>
             )}
         </div>
     );
 }
 
-// ============ LOGROS ============
-function Logros() {
-    const [xp] = React.useState(() => parseInt(localStorage.getItem("pardo_xp") || "0"));
-    const achievements = [
-        { icon: "🎯", name: "Primer Paso", desc: "Completa tu primera tarea" },
-        { icon: "📔", name: "Escritor", desc: "Escribe en el diario" },
-        { icon: "✅", name: "Creador", desc: "Crea un hábito" },
-        { icon: "📝", name: "Notero", desc: "Crea una nota" },
-        { icon: "⭐", name: "Soñador", desc: "Añade un deseo" },
-        { icon: "🔥", name: "Racha", desc: "3 días seguidos" },
-        { icon: "🌟", name: "Nivel 5", desc: "Alcanza 100 XP" },
-        { icon: "👑", name: "Leyenda", desc: "Alcanza 500 XP" }
-    ];
+// ============ MINI-JUEGO PARDO ============
+function MiniJuego() {
+    const [score, setScore] = React.useState(0);
+    const [timeLeft, setTimeLeft] = React.useState(10);
+    const [playing, setPlaying] = React.useState(false);
+    const [pardoPos, setPardoPos] = React.useState({ x: 50, y: 50 });
+    
+    React.useEffect(() => {
+        if (playing && timeLeft > 0) {
+            const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+            return () => clearTimeout(timer);
+        } else if (timeLeft === 0) {
+            setPlaying(false);
+            const xp = score * 5;
+            const currentXP = parseInt(localStorage.getItem("pardo_xp") || "0");
+            localStorage.setItem("pardo_xp", (currentXP + xp).toString());
+        }
+    }, [playing, timeLeft]);
+    
+    const startGame = () => {
+        setScore(0);
+        setTimeLeft(10);
+        setPlaying(true);
+    };
+    
+    const catchPardo = () => {
+        if (playing) {
+            setScore(score + 1);
+            setPardoPos({ x: Math.random() * 80 + 10, y: Math.random() * 80 + 10 });
+        }
+    };
+    
     return (
-        <div style={{ padding: "20px", maxWidth: "700px", margin: "0 auto" }}>
-            <h2 style={{ textAlign: "center" }}>🏆 Logros</h2>
-            <div style={{ background: "linear-gradient(135deg, #667eea, #764ba2)", color: "#fff", padding: "20px", borderRadius: "15px", textAlign: "center", marginBottom: "20px" }}>
-                <div style={{ fontSize: "35px" }}>🐕</div>
-                <h3>{xp} XP Total</h3>
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: "10px" }}>
-                {achievements.map((a, i) => (
-                    <div key={i} style={{ background: "#fff", padding: "15px", borderRadius: "10px", textAlign: "center" }}>
-                        <div style={{ fontSize: "30px" }}>{a.icon}</div>
-                        <h4 style={{ fontSize: "13px", margin: "8px 0" }}>{a.name}</h4>
-                        <p style={{ fontSize: "11px", color: "#666" }}>{a.desc}</p>
+        <div style={{ padding: "20px", maxWidth: "500px", margin: "0 auto", textAlign: "center" }}>
+            <h2>🎮 Atrapa a Pardo</h2>
+            <p style={{ color: "#666" }}>Haz click en Pardo para ganar XP</p>
+            {!playing ? (
+                <button onClick={startGame} style={{ padding: "15px 30px", background: "#667eea", color: "#fff", border: "none", borderRadius: "25px", cursor: "pointer", fontWeight: "bold" }}>▶️ Jugar</button>
+            ) : (
+                <div>
+                    <div style={{ display: "flex", justifyContent: "center", gap: "20px", marginBottom: "15px" }}>
+                        <span>⭐ Puntos: {score}</span>
+                        <span>⏰ Tiempo: {timeLeft}s</span>
                     </div>
-                ))}
-            </div>
+                    <div style={{ position: "relative", height: "300px", background: "#f8f9fa", borderRadius: "15px", overflow: "hidden" }}>
+                        <button onClick={catchPardo} style={{ position: "absolute", left: pardoPos.x + "%", top: pardoPos.y + "%", fontSize: "50px", background: "none", border: "none", cursor: "pointer", transition: "all 0.3s", animation: "bounce 1s infinite" }}>🐕</button>
+                    </div>
+                </div>
+            )}
+            {!playing && timeLeft === 0 && <p style={{ color: "#4CAF50", fontWeight: "bold", marginTop: "15px" }}>🎉 ¡Has ganado {score * 5} XP!</p>}
         </div>
     );
 }
 
-// ============ HOME CON INSTALL ============
-function Home({ user }) {
+// ============ RECORDATORIOS ============
+function Recordatorios() {
+    const [reminders, setReminders] = useLocalStorage("pardo_reminders", []);
+    const [text, setText] = React.useState("");
+    const [time, setTime] = React.useState("");
+    
+    React.useEffect(() => {
+        const interval = setInterval(() => {
+            const now = new Date();
+            const currentTime = now.getHours() + ":" + String(now.getMinutes()).padStart(2, "0");
+            reminders.forEach(r => {
+                if (r.time === currentTime && !r.notified) {
+                    if (Notification.permission === "granted") {
+                        new Notification("🔔 Recordatorio Pardo", { body: r.text });
+                    }
+                    const updated = reminders.map(x => x.id === r.id ? { ...x, notified: true } : x);
+                    setReminders(updated);
+                }
+            });
+        }, 30000);
+        return () => clearInterval(interval);
+    }, [reminders]);
+    
+    const addReminder = () => {
+        if (text && time) {
+            setReminders([...reminders, { id: Date.now(), text, time, notified: false }]);
+            setText("");
+            setTime("");
+        }
+    };
+    
+    return (
+        <div style={{ padding: "20px", maxWidth: "500px", margin: "0 auto" }}>
+            <h2 style={{ textAlign: "center" }}>🔔 Recordatorios</h2>
+            <div style={{ background: "#fff", padding: "15px", borderRadius: "10px", marginBottom: "15px" }}>
+                <input type="text" value={text} onChange={(e) => setText(e.target.value)} placeholder="¿Qué quieres recordar?" style={{ width: "100%", padding: "10px", marginBottom: "8px", border: "1px solid #ddd", borderRadius: "5px" }} />
+                <input type="time" value={time} onChange={(e) => setTime(e.target.value)} style={{ padding: "10px", border: "1px solid #ddd", borderRadius: "5px", marginRight: "8px" }} />
+                <button onClick={addReminder} style={{ padding: "10px 15px", background: "#667eea", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer" }}>➕ Añadir</button>
+            </div>
+            {reminders.length === 0 && <p style={{ textAlign: "center", color: "#999" }}>No hay recordatorios</p>}
+            {reminders.map(r => <div key={r.id} style={{ background: "#fff", padding: "10px", borderRadius: "8px", marginBottom: "8px", display: "flex", alignItems: "center", gap: "10px" }}><span>🕐 {r.time}</span><span style={{ flex: 1 }}>{r.text}</span><button onClick={() => setReminders(reminders.filter(x => x.id !== r.id))} style={{ background: "#dc3545", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer", padding: "5px 8px" }}>🗑️</button></div>)}
+        </div>
+    );
+}
+
+// ============ HOME ============
+function Home({ user, darkMode }) {
     const [tasks] = useLocalStorage("pardo_calendar", {});
     const [habits] = useLocalStorage("pardo_habits", []);
     const [diary] = useLocalStorage("pardo_diary", []);
+    const [xp] = React.useState(() => parseInt(localStorage.getItem("pardo_xp") || "0"));
     const greeting = new Date().getHours() < 12 ? "Buenos días" : new Date().getHours() < 20 ? "Buenas tardes" : "Buenas noches";
     return (
         <div style={{ padding: "25px", textAlign: "center", maxWidth: "700px", margin: "0 auto" }}>
             <div style={{ fontSize: "70px" }}>🐕</div>
-            <h1>{greeting}, {user?.username}!</h1>
-            <p style={{ color: "#666" }}>Tienes {Object.keys(tasks).length} días con tareas, {habits.length} hábitos, {diary.length} entradas de diario</p>
+            <h1 style={{ color: darkMode ? "#fff" : "#333" }}>{greeting}, {user?.username}!</h1>
+            <p style={{ color: darkMode ? "#aaa" : "#666" }}>Tienes {Object.keys(tasks).length} días con tareas, {habits.length} hábitos, {diary.length} diario | ⭐ {xp} XP</p>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "10px", marginTop: "20px" }}>
-                <div style={{ background: "#667eea", color: "#fff", padding: "15px", borderRadius: "10px" }}><div style={{ fontSize: "25px", fontWeight: "bold" }}>{Object.keys(tasks).length}</div><div style={{ fontSize: "11px" }}>Días con tareas</div></div>
+                <div style={{ background: "#667eea", color: "#fff", padding: "15px", borderRadius: "10px" }}><div style={{ fontSize: "25px", fontWeight: "bold" }}>{Object.keys(tasks).length}</div><div style={{ fontSize: "11px" }}>Días</div></div>
                 <div style={{ background: "#4CAF50", color: "#fff", padding: "15px", borderRadius: "10px" }}><div style={{ fontSize: "25px", fontWeight: "bold" }}>{habits.length}</div><div style={{ fontSize: "11px" }}>Hábitos</div></div>
                 <div style={{ background: "#FF9800", color: "#fff", padding: "15px", borderRadius: "10px" }}><div style={{ fontSize: "25px", fontWeight: "bold" }}>{diary.length}</div><div style={{ fontSize: "11px" }}>Diario</div></div>
+                <div style={{ background: "#9C27B0", color: "#fff", padding: "15px", borderRadius: "10px" }}><div style={{ fontSize: "25px", fontWeight: "bold" }}>{xp}</div><div style={{ fontSize: "11px" }}>XP</div></div>
             </div>
             <InstallPWA />
         </div>
     );
 }
 
+// ============ CALENDARIO ============
 function Calendario() {
     const [tasks, setTasks] = useLocalStorage("pardo_calendar", {});
     const [currentDate, setCurrentDate] = React.useState(new Date());
@@ -246,15 +324,83 @@ function Calendario() {
     );
 }
 
+// ============ NOTAS CON 12 COLORES E IMÁGENES ============
+function Notas() {
+    const [notes, setNotes] = useLocalStorage("pardo_notes", []);
+    const [newNote, setNewNote] = React.useState("");
+    const [color, setColor] = React.useState("#FFF9C4");
+    const [image, setImage] = React.useState(null);
+    const colors = ["#FFF9C4", "#FFCCBC", "#C8E6C9", "#BBDEFB", "#F8BBD0", "#D1C4E9", "#FFE0B2", "#B2DFDB", "#F0F4C3", "#DCEDC8", "#FFECB3", "#E1BEE7"];
+    const handleImage = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (ev) => setImage(ev.target.result);
+            reader.readAsDataURL(file);
+        }
+    };
+    const addNote = () => {
+        if (newNote || image) {
+            setNotes([{ id: Date.now(), text: newNote, color, image }, ...notes]);
+            setNewNote("");
+            setImage(null);
+        }
+    };
+    return (
+        <div style={{ padding: "20px", maxWidth: "700px", margin: "0 auto" }}>
+            <h2 style={{ textAlign: "center" }}>📝 Notas</h2>
+            <div style={{ background: "#fff", padding: "15px", borderRadius: "10px", marginBottom: "15px" }}>
+                <textarea value={newNote} onChange={(e) => setNewNote(e.target.value)} placeholder="Escribe una nota..." style={{ width: "100%", padding: "10px", minHeight: "70px", border: "1px solid #ddd", borderRadius: "5px", marginBottom: "8px" }} />
+                <div style={{ display: "flex", gap: "5px", flexWrap: "wrap", marginBottom: "8px" }}>
+                    {colors.map(c => <button key={c} onClick={() => setColor(c)} style={{ width: "25px", height: "25px", borderRadius: "50%", background: c, border: color === c ? "2px solid #333" : "1px solid #ddd", cursor: "pointer" }}></button>)}
+                </div>
+                <label style={{ display: "inline-block", padding: "8px 15px", background: "#4CAF50", color: "#fff", borderRadius: "5px", cursor: "pointer", marginRight: "8px", fontSize: "13px" }}>📸 Imagen
+                    <input type="file" accept="image/*" onChange={handleImage} style={{ display: "none" }} />
+                </label>
+                <button onClick={addNote} style={{ padding: "8px 15px", background: "#667eea", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer" }}>➕ Añadir</button>
+                {image && <div style={{ marginTop: "8px" }}><img src={image} alt="preview" style={{ maxWidth: "100px", maxHeight: "100px", borderRadius: "5px" }} /></div>}
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: "10px" }}>
+                {notes.map(n => (
+                    <div key={n.id} style={{ background: n.color, padding: "12px", borderRadius: "8px", minHeight: "100px", position: "relative" }}>
+                        <button onClick={() => setNotes(notes.filter(x => x.id !== n.id))} style={{ position: "absolute", top: "5px", right: "5px", background: "#dc3545", color: "#fff", border: "none", borderRadius: "50%", width: "24px", height: "24px", cursor: "pointer" }}>✕</button>
+                        {n.image && <img src={n.image} alt="" style={{ width: "100%", borderRadius: "5px", marginBottom: "5px" }} />}
+                        <p style={{ fontSize: "13px" }}>{n.text}</p>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+// ============ DIARIO CON GRÁFICO ============
 function Diario() {
     const [entries, setEntries] = useLocalStorage("pardo_diary", []);
     const [title, setTitle] = React.useState("");
     const [content, setContent] = React.useState("");
     const [mood, setMood] = React.useState("😊");
+    const [showChart, setShowChart] = React.useState(false);
     const moods = ["😊", "😢", "😴", "😡", "🤗", "😰", "🤩", "😌"];
+    const moodCounts = moods.map(m => ({ mood: m, count: entries.filter(e => e.mood === m).length }));
+    const maxCount = Math.max(...moodCounts.map(m => m.count), 1);
     return (
         <div style={{ padding: "20px", maxWidth: "700px", margin: "0 auto" }}>
             <h2 style={{ textAlign: "center" }}>📔 Mi Diario</h2>
+            <button onClick={() => setShowChart(!showChart)} style={{ display: "block", margin: "0 auto 15px", padding: "8px 16px", background: "#667eea", color: "#fff", border: "none", borderRadius: "20px", cursor: "pointer" }}>{showChart ? "Ocultar gráfico" : "Ver gráfico de moods"}</button>
+            {showChart && (
+                <div style={{ background: "#fff", padding: "15px", borderRadius: "10px", marginBottom: "15px" }}>
+                    <h4 style={{ textAlign: "center" }}>📊 Distribución de moods</h4>
+                    <div style={{ display: "flex", justifyContent: "space-around", alignItems: "flex-end", height: "100px", marginTop: "10px" }}>
+                        {moodCounts.map((m, i) => (
+                            <div key={i} style={{ textAlign: "center", flex: 1 }}>
+                                <div style={{ height: (m.count / maxCount) * 80 + "px", width: "20px", background: "linear-gradient(135deg, #667eea, #764ba2)", borderRadius: "5px 5px 0 0", margin: "0 auto" }} />
+                                <div style={{ fontSize: "16px" }}>{m.mood}</div>
+                                <div style={{ fontSize: "10px", color: "#999" }}>{m.count}</div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
             <div style={{ background: "#fff", padding: "15px", borderRadius: "10px", marginBottom: "15px" }}>
                 <input type="text" placeholder="Título" value={title} onChange={(e) => setTitle(e.target.value)} style={{ width: "100%", padding: "10px", marginBottom: "8px", border: "1px solid #ddd", borderRadius: "5px" }} />
                 <div style={{ display: "flex", gap: "5px", marginBottom: "8px" }}>{moods.map(m => <button key={m} onClick={() => setMood(m)} style={{ fontSize: "22px", background: "none", border: m === mood ? "2px solid #667eea" : "none", borderRadius: "50%", cursor: "pointer" }}>{m}</button>)}</div>
@@ -266,6 +412,7 @@ function Diario() {
     );
 }
 
+// ============ HÁBITOS ============
 function Habitos() {
     const [habits, setHabits] = useLocalStorage("pardo_habits", []);
     const [newHabit, setNewHabit] = React.useState("");
@@ -282,21 +429,7 @@ function Habitos() {
     );
 }
 
-function Notas() {
-    const [notes, setNotes] = useLocalStorage("pardo_notes", []);
-    const [newNote, setNewNote] = React.useState("");
-    return (
-        <div style={{ padding: "20px", maxWidth: "700px", margin: "0 auto" }}>
-            <h2 style={{ textAlign: "center" }}>📝 Notas</h2>
-            <div style={{ display: "flex", gap: "8px", marginBottom: "15px" }}>
-                <textarea value={newNote} onChange={(e) => setNewNote(e.target.value)} placeholder="Escribe una nota..." style={{ flex: 1, padding: "10px", minHeight: "70px", border: "1px solid #ddd", borderRadius: "5px" }} />
-                <button onClick={() => { if (newNote) { setNotes([{ id: Date.now(), text: newNote }, ...notes]); setNewNote(""); } }} style={{ padding: "10px 15px", background: "#667eea", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer" }}>➕</button>
-            </div>
-            {notes.map(n => <div key={n.id} style={{ background: "#fff", padding: "12px", borderRadius: "8px", marginBottom: "8px", position: "relative" }}><button onClick={() => setNotes(notes.filter(x => x.id !== n.id))} style={{ position: "absolute", top: "5px", right: "5px", background: "#dc3545", color: "#fff", border: "none", borderRadius: "50%", width: "24px", height: "24px", cursor: "pointer" }}>✕</button><p>{n.text}</p></div>)}
-        </div>
-    );
-}
-
+// ============ DESEOS ============
 function Deseos() {
     const [wishes, setWishes] = useLocalStorage("pardo_wishes", []);
     const [newWish, setNewWish] = React.useState("");
@@ -347,9 +480,179 @@ function Servicios() {
     );
 }
 
+function Logros() {
+    const [xp] = React.useState(() => parseInt(localStorage.getItem("pardo_xp") || "0"));
+    const achievements = [
+        { icon: "🎯", name: "Primer Paso", desc: "Completa tu primera tarea" },
+        { icon: "📔", name: "Escritor", desc: "Escribe en el diario" },
+        { icon: "✅", name: "Creador", desc: "Crea un hábito" },
+        { icon: "📝", name: "Notero", desc: "Crea una nota" },
+        { icon: "⭐", name: "Soñador", desc: "Añade un deseo" },
+        { icon: "🔥", name: "Racha", desc: "3 días seguidos" },
+        { icon: "🌟", name: "Nivel 5", desc: "Alcanza 100 XP" },
+        { icon: "👑", name: "Leyenda", desc: "Alcanza 500 XP" }
+    ];
+    return (
+        <div style={{ padding: "20px", maxWidth: "700px", margin: "0 auto" }}>
+            <h2 style={{ textAlign: "center" }}>🏆 Logros</h2>
+            <div style={{ background: "linear-gradient(135deg, #667eea, #764ba2)", color: "#fff", padding: "20px", borderRadius: "15px", textAlign: "center", marginBottom: "20px" }}><div style={{ fontSize: "35px" }}>🐕</div><h3>{xp} XP Total</h3></div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: "10px" }}>
+                {achievements.map((a, i) => <div key={i} style={{ background: "#fff", padding: "15px", borderRadius: "10px", textAlign: "center" }}><div style={{ fontSize: "30px" }}>{a.icon}</div><h4 style={{ fontSize: "13px", margin: "8px 0" }}>{a.name}</h4><p style={{ fontSize: "11px", color: "#666" }}>{a.desc}</p></div>)}
+            </div>
+        </div>
+    );
+}
+
+function Estadisticas() {
+    const [tasks] = useLocalStorage("pardo_calendar", {});
+    const [habits] = useLocalStorage("pardo_habits", []);
+    const [diary] = useLocalStorage("pardo_diary", []);
+    const [notes] = useLocalStorage("pardo_notes", []);
+    const [wishes] = useLocalStorage("pardo_wishes", []);
+    const totalTasks = Object.values(tasks).reduce((s, arr) => s + arr.length, 0);
+    return (
+        <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
+            <h2 style={{ textAlign: "center" }}>📊 Estadísticas</h2>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "10px", marginBottom: "20px" }}>
+                <div style={{ background: "#667eea", color: "#fff", padding: "15px", borderRadius: "10px", textAlign: "center" }}><div style={{ fontSize: "25px", fontWeight: "bold" }}>{totalTasks}</div><div style={{ fontSize: "11px" }}>Tareas</div></div>
+                <div style={{ background: "#4CAF50", color: "#fff", padding: "15px", borderRadius: "10px", textAlign: "center" }}><div style={{ fontSize: "25px", fontWeight: "bold" }}>{habits.length}</div><div style={{ fontSize: "11px" }}>Hábitos</div></div>
+                <div style={{ background: "#FF9800", color: "#fff", padding: "15px", borderRadius: "10px", textAlign: "center" }}><div style={{ fontSize: "25px", fontWeight: "bold" }}>{diary.length}</div><div style={{ fontSize: "11px" }}>Diario</div></div>
+                <div style={{ background: "#9C27B0", color: "#fff", padding: "15px", borderRadius: "10px", textAlign: "center" }}><div style={{ fontSize: "25px", fontWeight: "bold" }}>{notes.length}</div><div style={{ fontSize: "11px" }}>Notas</div></div>
+                <div style={{ background: "#f44336", color: "#fff", padding: "15px", borderRadius: "10px", textAlign: "center" }}><div style={{ fontSize: "25px", fontWeight: "bold" }}>{wishes.length}</div><div style={{ fontSize: "11px" }}>Deseos</div></div>
+            </div>
+        </div>
+    );
+}
+
+function Exportar() {
+    const [message, setMessage] = React.useState("");
+    const exportData = () => {
+        const data = {
+            calendar: JSON.parse(localStorage.getItem("pardo_calendar") || "{}"),
+            diary: JSON.parse(localStorage.getItem("pardo_diary") || "[]"),
+            habits: JSON.parse(localStorage.getItem("pardo_habits") || "[]"),
+            notes: JSON.parse(localStorage.getItem("pardo_notes") || "[]"),
+            wishes: JSON.parse(localStorage.getItem("pardo_wishes") || "[]")
+        };
+        const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = "pardo-backup.json"; a.click();
+        setMessage("✅ Exportado");
+    };
+    return (
+        <div style={{ padding: "20px", maxWidth: "500px", margin: "0 auto", textAlign: "center" }}>
+            <h2>📤 Exportar</h2>
+            <button onClick={exportData} style={{ padding: "12px 25px", background: "#667eea", color: "#fff", border: "none", borderRadius: "10px", cursor: "pointer", fontWeight: "bold" }}>📥 Descargar Backup</button>
+            {message && <p style={{ color: "#4CAF50" }}>{message}</p>}
+        </div>
+    );
+}
+
+function Notificaciones() {
+    const [permission, setPermission] = React.useState(Notification.permission);
+    const requestPermission = async () => { const r = await Notification.requestPermission(); setPermission(r); };
+    return (
+        <div style={{ padding: "20px", maxWidth: "500px", margin: "0 auto", textAlign: "center" }}>
+            <h2>🔔 Notificaciones</h2>
+            <p>Estado: {permission === "granted" ? "✅ Permitido" : permission === "denied" ? "❌ Denegado" : "⚠️ Sin decidir"}</p>
+            {permission !== "granted" && <button onClick={requestPermission} style={{ padding: "10px 20px", background: "#667eea", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer" }}>Solicitar permiso</button>}
+        </div>
+    );
+}
+
+function DarkModeToggle({ darkMode, setDarkMode }) {
+    return <button onClick={() => { setDarkMode(!darkMode); localStorage.setItem("pardo_dark", (!darkMode).toString()); }} style={{ padding: "6px 12px", borderRadius: "15px", border: "1px solid #ddd", background: darkMode ? "#1a1a2e" : "#fff", color: darkMode ? "#FFD700" : "#333", cursor: "pointer", fontSize: "12px" }}>{darkMode ? "☀️" : "🌙"}</button>;
+}
+
+function Idiomas({ darkMode }) {
+    const [lang, setLang] = React.useState(localStorage.getItem("pardo_lang") || "es");
+    return (
+        <div style={{ padding: "20px", textAlign: "center" }}>
+            <h2>🌍 Idiomas</h2>
+            <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+                <button onClick={() => { setLang("es"); localStorage.setItem("pardo_lang", "es"); }}>ES</button>
+                <button onClick={() => { setLang("en"); localStorage.setItem("pardo_lang", "en"); }}>EN</button>
+                <button onClick={() => { setLang("fr"); localStorage.setItem("pardo_lang", "fr"); }}>FR</button>
+            </div>
+        </div>
+    );
+}
+
+function Pomodoro() {
+    const [minutes, setMinutes] = React.useState(25);
+    const [seconds, setSeconds] = React.useState(0);
+    const [running, setRunning] = React.useState(false);
+    React.useEffect(() => {
+        if (running) {
+            const t = setInterval(() => {
+                if (seconds === 0) {
+                    if (minutes === 0) { setRunning(false); setMinutes(25); }
+                    else { setMinutes(minutes - 1); setSeconds(59); }
+                } else { setSeconds(seconds - 1); }
+            }, 1000);
+            return () => clearInterval(t);
+        }
+    }, [running, minutes, seconds]);
+    return (
+        <div style={{ textAlign: "center" }}>
+            <h2>🍅 Pomodoro</h2>
+            <div style={{ fontSize: "60px" }}>{String(minutes).padStart(2,"0")}:{String(seconds).padStart(2,"0")}</div>
+            <button onClick={() => setRunning(!running)}>{running ? "Pausar" : "Iniciar"}</button>
+        </div>
+    );
+}
+
+function Compras() {
+    const [items, setItems] = useLocalStorage("pardo_compras", []);
+    const [newItem, setNewItem] = React.useState("");
+    return (
+        <div style={{ padding: "20px" }}>
+            <h2>🛒 Compras</h2>
+            <input value={newItem} onChange={(e) => setNewItem(e.target.value)} placeholder="Producto" />
+            <button onClick={() => { if (newItem) { setItems([...items, { id: Date.now(), name: newItem, done: false }]); setNewItem(""); } }}>+</button>
+            {items.map(i => <div key={i.id}>{i.name} <button onClick={() => setItems(items.filter(x => x.id !== i.id))}>X</button></div>)}
+        </div>
+    );
+}
+
+function Contactos() {
+    const [contacts, setContacts] = useLocalStorage("pardo_contactos", []);
+    const [name, setName] = React.useState("");
+    const [phone, setPhone] = React.useState("");
+    return (
+        <div style={{ padding: "20px" }}>
+            <h2>📇 Contactos</h2>
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre" />
+            <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Telefono" />
+            <button onClick={() => { if (name) { setContacts([...contacts, { id: Date.now(), name, phone }]); setName(""); setPhone(""); } }}>+</button>
+            {contacts.map(c => <div key={c.id}>{c.name} {c.phone} <button onClick={() => setContacts(contacts.filter(x => x.id !== c.id))}>X</button></div>)}
+        </div>
+    );
+}
+
+function Calculadora() {
+    const [display, setDisplay] = React.useState("0");
+    const press = (btn) => {
+        if (btn === "C") { setDisplay("0"); return; }
+        if (btn === "=") { try { setDisplay(String(eval(display))); } catch { setDisplay("Error"); } return; }
+        setDisplay(display === "0" ? btn : display + btn);
+    };
+    const buttons = ["7","8","9","/","4","5","6","*","1","2","3","-","0",".","=","+","C"];
+    return (
+        <div style={{ padding: "20px" }}>
+            <h2>🔢 Calculadora</h2>
+            <div style={{ fontSize: "28px" }}>{display}</div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "8px" }}>
+                {buttons.map(btn => <button key={btn} onClick={() => press(btn)}>{btn}</button>)}
+            </div>
+        </div>
+    );
+}
 function MainApp({ user, logout }) {
     const [isMobile, setIsMobile] = React.useState(window.innerWidth < 768);
     const [menuOpen, setMenuOpen] = React.useState(false);
+    const [darkMode, setDarkMode] = React.useState(() => localStorage.getItem("pardo_dark") === "true");
     const menu = [
         { path: "/", icon: "🏠", name: "Hoy" },
         { path: "/calendario", icon: "📅", name: "Calendario" },
@@ -359,49 +662,63 @@ function MainApp({ user, logout }) {
         { path: "/deseos", icon: "⭐", name: "Deseos" },
         { path: "/logros", icon: "🏆", name: "Logros" },
         { path: "/frases", icon: "💬", name: "Frases" },
-        { path: "/servicios", icon: "🔧", name: "Servicios" }
+        { path: "/estadisticas", icon: "📊", name: "Stats" },
+        { path: "/servicios", icon: "🔧", name: "Servicios" },
+        { path: "/exportar", icon: "📤", name: "Exportar" },
+        { path: "/notificaciones", icon: "🔔", name: "Alertas" },
+        { path: "/juego", icon: "🎮", name: "Juego" },
+        { path: "/recordatorios", icon: "⏰", name: "Recordatorios" },
+        { path: "/idiomas", icon: "🌍", name: "Idiomas" },
+        { path: "/pomodoro", icon: "🍅", name: "Pomodoro" },
+        { path: "/compras", icon: "🛒", name: "Compras" },
+        { path: "/contactos", icon: "📇", name: "Contactos" },
+        { path: "/calculadora", icon: "🔢", name: "Calc" },
+        { path: "/temas", icon: "🎨", name: "Temas" },
+        { path: "/asistente", icon: "🤖", name: "IA" }
     ];
+    const bg = darkMode ? "#1a1a2e" : "#f5f5f5";
+    const textColor = darkMode ? "#fff" : "#333";
     return (
-        <div style={{ minHeight: "100vh", background: "#f5f5f5", fontFamily: "Arial", display: "flex", flexDirection: "column" }}>
-            <nav style={{ background: "#fff", padding: "10px 15px", boxShadow: "0 2px 4px rgba(0,0,0,0.1)", position: "sticky", top: 0, zIndex: 100 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <Link to="/" style={{ fontSize: "20px", fontWeight: "bold", color: "#667eea", textDecoration: "none" }}>🐕 Pardo</Link>
-                    {isMobile ? (
-                        <button onClick={() => setMenuOpen(!menuOpen)} style={{ fontSize: "24px", background: "none", border: "none", cursor: "pointer" }}>{menuOpen ? "✕" : "☰"}</button>
-                    ) : (
-                        <div style={{ display: "flex", gap: "5px", flexWrap: "wrap" }}>
-                            {menu.map(m => <Link key={m.path} to={m.path} style={{ padding: "7px 10px", borderRadius: "20px", textDecoration: "none", color: "#333", background: "#f0f0f0", fontSize: "12px" }}>{m.icon} {m.name}</Link>)}
-                        </div>
-                    )}
-                    <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                        <span style={{ fontSize: "12px" }}>👤 {user?.username}</span>
-                        <button onClick={logout} style={{ padding: "5px 10px", background: "#f44336", color: "#fff", border: "none", borderRadius: "15px", cursor: "pointer", fontSize: "11px" }}>Salir</button>
-                    </div>
-                </div>
-                {isMobile && menuOpen && (
-                    <div style={{ marginTop: "10px", display: "flex", flexDirection: "column", gap: "5px" }}>
-                        {menu.map(m => <Link key={m.path} to={m.path} onClick={() => setMenuOpen(false)} style={{ padding: "10px 15px", borderRadius: "8px", textDecoration: "none", color: "#333", background: "#f8f9fa", fontSize: "14px" }}>{m.icon} {m.name}</Link>)}
-                    </div>
-                )}
-            </nav>
+        <div style={{ minHeight: "100vh", background: bg, fontFamily: "Arial", display: "flex", flexDirection: "column" }}>
+            <SplashScreen />
+            <Navigation user={user} logout={logout} darkMode={darkMode} />
             <div style={{ flex: 1, padding: "20px" }}>
                 <Routes>
-                    <Route path="/" element={<Home user={user} />} />
+                    <Route path="/" element={<Home user={user} darkMode={darkMode} />} />
                     <Route path="/calendario" element={<Calendario />} />
                     <Route path="/diario" element={<Diario />} />
                     <Route path="/habitos" element={<Habitos />} />
                     <Route path="/notas" element={<Notas />} />
                     <Route path="/deseos" element={<Deseos />} />
-                    <Route path="/logros" element={<Logros />} />
+                    <Route path="/logros" element={<LogrosAvanzados darkMode={darkMode} />} />
                     <Route path="/frases" element={<Frases />} />
+                    <Route path="/estadisticas" element={<Estadisticas />} />
                     <Route path="/servicios" element={<Servicios />} />
+                    <Route path="/exportar" element={<Exportar />} />
+                    <Route path="/notificaciones" element={<Notificaciones />} />
+                    <Route path="/juego" element={<MiniJuego />} />
+                    <Route path="/recordatorios" element={<Recordatorios />} />
+                    <Route path="/idiomas" element={<Idiomas darkMode={darkMode} />} />
+                    <Route path="/pomodoro" element={<Pomodoro darkMode={darkMode} />} />
+                    <Route path="/compras" element={<Compras darkMode={darkMode} />} />
+                    <Route path="/contactos" element={<Contactos darkMode={darkMode} />} />
+                    <Route path="/privacidad" element={<Privacidad darkMode={darkMode} />} />
+                    <Route path="/terminos" element={<Terminos darkMode={darkMode} />} />
+                    <Route path="/cookies" element={<Privacidad darkMode={darkMode} />} />
+                                        <Route path="/temas" element={<Temas darkMode={darkMode} />} />
+                    <Route path="/asistente" element={<Asistente darkMode={darkMode} />} />
+                    <Route path="/privacidad" element={<Privacidad darkMode={darkMode} />} />
+                    <Route path="/terminos" element={<Terminos darkMode={darkMode} />} />
+                    <Route path="/temas" element={<Temas darkMode={darkMode} />} />
+                    <Route path="/asistente" element={<Asistente darkMode={darkMode} />} />
+                    <Route path="/calculadora" element={<Calculadora darkMode={darkMode} />} />
                 </Routes>
-            </div>
+            <CookieBanner darkMode={darkMode} />
+            <CookieBanner />
             <Footer />
         </div>
     );
 }
-
 function App() {
     const { user, logout, loading } = useAuth();
     if (loading) return <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", fontSize: "60px" }}>🐕</div>;
