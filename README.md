@@ -1,10 +1,10 @@
-# 🐕 Pardo Agenda v5.1
+# 🐕 Pardo Agenda v5.2
 
 Tu mascota virtual te ayuda a organizarte
 
 ## 📋 Descripción
 
-Pardo Agenda es una aplicación web completa de organización personal con mascota virtual interactiva. Incluye calendario, diario, hábitos, notas, deseos, frases, estadísticas, logros, y mucho más.
+Pardo Agenda es una aplicación web completa de organización personal con mascota virtual interactiva. Incluye calendario, diario, hábitos, notas, deseos, frases, estadísticas, logros, notificaciones push reales, sincronización con PostgreSQL y mucho más.
 
 ## 🚀 Características
 
@@ -24,7 +24,7 @@ Pardo Agenda es una aplicación web completa de organización personal con masco
 - Diario con moods y gráfico
 - Sistema de logros (7 niveles + 12 logros)
 - Frases motivacionales
-- Rachas diarias con mejor racha
+- Rachas diarias y heatmap de actividad
 - Multi-idioma (ES/EN/FR)
 
 ### 🔧 Herramientas
@@ -39,7 +39,8 @@ Pardo Agenda es una aplicación web completa de organización personal con masco
 - Dashboard con gráficos
 - Estadísticas de productividad
 - Exportar/Importar JSON
-- Notificaciones
+- Notificaciones push reales (Web Push API)
+- Sincronización en la nube con PostgreSQL
 
 ### 🎨 Personalización
 - 6 temas de color
@@ -48,7 +49,7 @@ Pardo Agenda es una aplicación web completa de organización personal con masco
 
 ### 📱 PWA
 - Instalable en móvil
-- Service Worker
+- Service Worker con soporte push
 - Funcionamiento offline
 
 ### 🔒 Privacidad
@@ -64,11 +65,11 @@ Pardo Agenda es una aplicación web completa de organización personal con masco
 ## 🛠️ Tecnologías
 
 - **Frontend:** React 18, React Router, Context API
-- **Backend:** Node.js, Express, JWT, bcryptjs
+- **Backend:** Node.js, Express, JWT, bcryptjs, web-push
 - **Base de datos:** PostgreSQL 16
 - **Contenedores:** Docker Compose
 - **Caché:** Redis
-- **PWA:** Service Worker + Manifest
+- **PWA:** Service Worker + Manifest + Push API
 
 ## 📦 Instalación
 
@@ -87,9 +88,9 @@ Password: admin123
 
 ## 🌐 URLs
 
-- Frontend: http://localhost:3000
-- Backend: http://localhost:5000
-- Adminer: http://localhost:8081
+- Frontend: https://pardo-agenda.netlify.app
+- Backend: https://pardo-backend-3fp6.onrender.com
+- Repositorio: https://github.com/urukaisk-maker/pardo-agenda
 
 ## 👨‍💻 Desarrollador
 
