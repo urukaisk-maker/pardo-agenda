@@ -105,8 +105,8 @@ function Login() {
                     <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Contraseña" required style={{ width: "100%", padding: "12px", marginBottom: "15px", border: "1px solid #ddd", borderRadius: "5px" }} />
                     <button type="submit" style={{ width: "100%", padding: "12px", background: "#667eea", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer", fontWeight: "bold" }}>Entrar</button>
                 </form>
-                <p style={{ textAlign: "center", marginTop: "15px" }}><Link to="/registro" style={{ color: "#667eea" }}>Registrarse</Link></p>
-                    <button onClick={loginAsGuest} style={{ width: "100%", padding: "10px", background: "transparent", color: "#667eea", border: "1px solid #667eea", borderRadius: "5px", marginTop: "10px", cursor: "pointer" }}>👤 Probar como invitado</button> · <Link to="/recuperar" style={{ color: "#667eea" }}>¿Olvidaste tu contraseña?</Link></p>
+                <p style={{ textAlign: "center", marginTop: "15px" }}><Link to="/registro" style={{ color: "#667eea" }}>Registrarse</Link> · <Link to="/recuperar" style={{ color: "#667eea" }}>¿Olvidaste tu contraseña?</Link></p>
+                    <button onClick={loginAsGuest} style={{ width: "100%", padding: "10px", background: "transparent", color: "#667eea", border: "1px solid #667eea", borderRadius: "5px", marginTop: "10px", cursor: "pointer" }}>👤 Probar como invitado</button>
             </div>
         </div>
     );
