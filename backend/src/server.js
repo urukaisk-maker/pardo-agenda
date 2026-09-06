@@ -28,7 +28,7 @@ app.use(helmet({
     crossOriginEmbedderPolicy: false
 }));
 
-app.use(cors({ origin: "*", methods: "GET,HEAD,PUT,PATCH,POST,DELETE" }));
+app.use(cors({ origin: "*", methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS", credentials: false, methods: "GET,HEAD,PUT,PATCH,POST,DELETE" }));
 app.use(morgan("dev"));
 app.use(express.json());
 
