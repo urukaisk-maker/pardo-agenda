@@ -152,8 +152,8 @@ const webpush = require("web-push");
 let pushSubscriptions = [];
 
 const vapidKeys = {
-    publicKey: process.env.VAPID_PUBLIC_KEY || "BEl62iM1j1tCqT7jDz4O7f4F4z0z9YJX6q0zB7zC7oJ5K6z5P5tK0V4nM5mZqN2w3w3f5D3t5j5i5v5n5",
-    privateKey: process.env.VAPID_PRIVATE_KEY || "i5cT3Qm8z6jXxE5nR2wW7tY0pL1dK9sH4gU6vB3aQ1o"
+    publicKey: process.env.VAPID_PUBLIC_KEY || "BLSvMpGvLrhbuNlAL8BfQOFCmrkli6zwnKb-2vEybyqpA1zNZDr4BXqgzWbH_nysoPw4SN1Gth7i-bacLbap7iY",
+    privateKey: process.env.VAPID_PRIVATE_KEY || "FTMJrvyUZWHPs35-pIaV2M9FItQe59YetdY49GVXCZU"
 };
 webpush.setVapidDetails(
     "mailto:urukaisk@gmail.com",
