@@ -294,95 +294,10 @@ function Home({ user, darkMode }) {
 }
 
 // ============ CALENDARIO ============
-function Calendario() {
-    const [tasks, setTasks] = useLocalStorage("pardo_calendar", {});
-    const [currentDate, setCurrentDate] = React.useState(new Date());
-    const [selectedDate, setSelectedDate] = React.useState(null);
-    const [newTask, setNewTask] = React.useState("");
-    const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-    const daysOfWeek = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const firstDay = new Date(year, month, 1).getDay();
-    const days = [];
-    for (let i = 0; i < firstDay; i++) days.push(<div key={"e"+i}></div>);
-    for (let d = 1; d <= daysInMonth; d++) {
-        const isToday = d === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear();
-        const dateKey = year + "-" + String(month+1).padStart(2,"0") + "-" + String(d).padStart(2,"0");
-        days.push(<div key={d} onClick={() => setSelectedDate(dateKey)} style={{ padding: "10px", textAlign: "center", background: isToday ? "#667eea" : "#fff", color: isToday ? "#fff" : "#333", borderRadius: "5px", border: "1px solid #ddd", cursor: "pointer" }}>{d}</div>);
-    }
-    return (
-        <div style={{ padding: "20px", maxWidth: "850px", margin: "0 auto" }}>
-            <h2 style={{ textAlign: "center" }}>📅 Calendario</h2>
-            <div style={{ display: "flex", justifyContent: "space-between", background: "#fff", padding: "15px", borderRadius: "10px", marginBottom: "15px" }}>
-                <button onClick={() => setCurrentDate(new Date(year, month - 1, 1))} style={{ padding: "8px 15px", border: "none", background: "#667eea", color: "#fff", borderRadius: "5px", cursor: "pointer" }}>←</button>
-                <h3 style={{ margin: 0 }}>{months[month]} {year}</h3>
-                <button onClick={() => setCurrentDate(new Date(year, month + 1, 1))} style={{ padding: "8px 15px", border: "none", background: "#667eea", color: "#fff", borderRadius: "5px", cursor: "pointer" }}>→</button>
-            </div>
-            <div style={{ background: "#fff", padding: "15px", borderRadius: "10px" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "5px" }}>{daysOfWeek.map(d => <div key={d} style={{ textAlign: "center", fontWeight: "bold", fontSize: "12px" }}>{d}</div>)}</div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "5px" }}>{days}</div>
-            </div>
-            {selectedDate && (
-                <div style={{ background: "#fff", padding: "15px", borderRadius: "10px", marginTop: "15px" }}>
-                    <h3>📋 {selectedDate}</h3>
-                    {(tasks[selectedDate] || []).map((t, i) => <div key={i} style={{ display: "flex", gap: "8px", padding: "8px" }}><span style={{ flex: 1 }}>{t}</span><button onClick={() => { const updated = { ...tasks }; updated[selectedDate] = updated[selectedDate].filter((_, x) => x !== i); setTasks(updated); }} style={{ background: "#dc3545", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer" }}>🗑️</button></div>)}
-                    <div style={{ display: "flex", gap: "8px", marginTop: "10px" }}><input value={newTask} onChange={(e) => setNewTask(e.target.value)} placeholder="Nueva tarea..." style={{ flex: 1, padding: "8px", border: "1px solid #ddd", borderRadius: "5px" }} /><button onClick={() => { if (newTask) { setTasks({ ...tasks, [selectedDate]: [...(tasks[selectedDate] || []), newTask] }); setNewTask(""); } }} style={{ padding: "8px 15px", background: "#4CAF50", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer" }}>➕</button></div>
-                </div>
-            )}
-        </div>
-    );
-}
+
 
 // ============ NOTAS CON 12 COLORES E IMÁGENES ============
-function Notas() {
-    const [notes, setNotes] = useLocalStorage("pardo_notes", []);
-    const [newNote, setNewNote] = React.useState("");
-    const [color, setColor] = React.useState("#FFF9C4");
-    const [image, setImage] = React.useState(null);
-    const colors = ["#FFF9C4", "#FFCCBC", "#C8E6C9", "#BBDEFB", "#F8BBD0", "#D1C4E9", "#FFE0B2", "#B2DFDB", "#F0F4C3", "#DCEDC8", "#FFECB3", "#E1BEE7"];
-    const handleImage = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (ev) => setImage(ev.target.result);
-            reader.readAsDataURL(file);
-        }
-    };
-    const addNote = () => {
-        if (newNote || image) {
-            setNotes([{ id: Date.now(), text: newNote, color, image }, ...notes]);
-            setNewNote("");
-            setImage(null);
-        }
-    };
-    return (
-        <div style={{ padding: "20px", maxWidth: "700px", margin: "0 auto" }}>
-            <h2 style={{ textAlign: "center" }}>📝 Notas</h2>
-            <div style={{ background: "#fff", padding: "15px", borderRadius: "10px", marginBottom: "15px" }}>
-                <textarea value={newNote} onChange={(e) => setNewNote(e.target.value)} placeholder="Escribe una nota..." style={{ width: "100%", padding: "10px", minHeight: "70px", border: "1px solid #ddd", borderRadius: "5px", marginBottom: "8px" }} />
-                <div style={{ display: "flex", gap: "5px", flexWrap: "wrap", marginBottom: "8px" }}>
-                    {colors.map(c => <button key={c} onClick={() => setColor(c)} style={{ width: "25px", height: "25px", borderRadius: "50%", background: c, border: color === c ? "2px solid #333" : "1px solid #ddd", cursor: "pointer" }}></button>)}
-                </div>
-                <label style={{ display: "inline-block", padding: "8px 15px", background: "#4CAF50", color: "#fff", borderRadius: "5px", cursor: "pointer", marginRight: "8px", fontSize: "13px" }}>📸 Imagen
-                    <input type="file" accept="image/*" onChange={handleImage} style={{ display: "none" }} />
-                </label>
-                <button onClick={addNote} style={{ padding: "8px 15px", background: "#667eea", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer" }}>➕ Añadir</button>
-                {image && <div style={{ marginTop: "8px" }}><img src={image} alt="preview" style={{ maxWidth: "100px", maxHeight: "100px", borderRadius: "5px" }} /></div>}
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: "10px" }}>
-                {notes.map(n => (
-                    <div key={n.id} style={{ background: n.color, padding: "12px", borderRadius: "8px", minHeight: "100px", position: "relative" }}>
-                        <button onClick={() => setNotes(notes.filter(x => x.id !== n.id))} style={{ position: "absolute", top: "5px", right: "5px", background: "#dc3545", color: "#fff", border: "none", borderRadius: "50%", width: "24px", height: "24px", cursor: "pointer" }}>✕</button>
-                        {n.image && <img src={n.image} alt="" style={{ width: "100%", borderRadius: "5px", marginBottom: "5px" }} />}
-                        <p style={{ fontSize: "13px" }}>{n.text}</p>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-}
+
 
 // ============ DIARIO CON GRÁFICO ============
 function Diario() {
