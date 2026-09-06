@@ -14,7 +14,20 @@ const wishesRoutes = require("./routes/wishes.routes");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(helmet());
+// Configurar helmet SIN bloquear estilos inline
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["*"],
+            scriptSrc: ["*", "unsafe-inline", "unsafe-eval"],
+            styleSrc: ["*", "unsafe-inline"],
+            imgSrc: ["*", "data:", "blob:"],
+            connectSrc: ["*"]
+        }
+    },
+    crossOriginEmbedderPolicy: false
+}));
+
 app.use(cors({ origin: "*", methods: "GET,HEAD,PUT,PATCH,POST,DELETE" }));
 app.use(morgan("dev"));
 app.use(express.json());
@@ -29,6 +42,10 @@ app.use("/api/wishes", wishesRoutes);
 
 app.get("/health", (req, res) => {
     res.json({ status: "OK", service: "Pardo Agenda API", pardo: "🐕" });
+});
+
+app.get("/", (req, res) => {
+    res.json({ message: "🐕 Pardo Agenda API", version: "1.0.0" });
 });
 
 app.listen(PORT, () => {
