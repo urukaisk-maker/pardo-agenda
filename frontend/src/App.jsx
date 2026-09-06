@@ -11,6 +11,14 @@ import Asistente from "./components/Asistente";
 import Navigation from "./components/Navigation";
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from "react-router-dom";
 
+
+const CalendarioLazy = React.lazy(() => import("./components/CalendarioLazy"));
+const DiarioLazy = React.lazy(() => import("./components/DiarioLazy"));
+const HabitosLazy = React.lazy(() => import("./components/HabitosLazy"));
+const NotasLazy = React.lazy(() => import("./components/NotasLazy"));
+const LogrosLazy = React.lazy(() => import("./components/LogrosLazy"));
+const EstadisticasLazy = React.lazy(() => import("./components/EstadisticasLazy"));
+
 const API = process.env.REACT_APP_API_URL || "https://pardo-backend-3fp6.onrender.com";
 
 // ============ SPLASH SCREEN ============

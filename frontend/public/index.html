@@ -4,14 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#667eea">
-    <meta name="description" content="Pardo Agenda - Tu mascota virtual te ayuda a organizarte">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Pardo">
+    <meta name="description" content="Pardo Agenda - Tu mascota virtual te ayuda a organizarte. Calendario, diario, hábitos, notas y más.">
+    <meta name="keywords" content="agenda, productividad, mascota, tareas, hábitos, diario, notas">
+    <meta name="author" content="Manuel Casimiro Carrasco">
+    <meta property="og:title" content="🐕 Pardo Agenda">
+    <meta property="og:description" content="Tu mascota virtual te ayuda a organizarte">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://pardo-agenda.netlify.app">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="🐕 Pardo Agenda">
+    <meta name="twitter:description" content="Tu mascota virtual te ayuda a organizarte">
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <link rel="apple-touch-icon" href="/icons/icon.svg">
-    <title>🐕 Pardo Agenda</title>
+    <title>🐕 Pardo Agenda - Tu mascota virtual de productividad</title>
 </head>
 <body>
     <div id="root"></div>
@@ -20,8 +25,8 @@
         if ("serviceWorker" in navigator) {
             window.addEventListener("load", () => {
                 navigator.serviceWorker.register("/service-worker.js")
-                    .then(() => console.log("✅ Service Worker registrado"))
-                    .catch((err) => console.log("Error SW:", err));
+                    .then(() => console.log("SW registrado"))
+                    .catch(() => {});
             });
         }
     </script>
