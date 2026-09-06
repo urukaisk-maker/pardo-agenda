@@ -61,6 +61,7 @@ function validateRegister(req, res, next) {
     next();
 }
 
+const apiRoutes = require("./routes/api.routes");
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false }
@@ -79,6 +80,7 @@ app.use(helmet({
 app.use(cors({ origin: "*" }));
 app.use(morgan("dev"));
 app.use(express.json({ limit: "100kb" }));
+app.use("/api", apiRoutes);
 
 // Login con rate limiting y validación
 app.post("/api/auth/login", rateLimiter, validateLogin, async (req, res) => {
