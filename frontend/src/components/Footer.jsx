@@ -14,9 +14,14 @@ function Footer() {
                     <a href="https://rad-dolphin-182dfb.netlify.app/" target="_blank" rel="noopener noreferrer" style={{ color: "#FFD700", textDecoration: "none" }}>✨ Guardianes</a>
                 </div>
                 
-                <div style={{ display: "flex", justifyContent: "center", gap: "20px", flexWrap: "wrap", marginBottom: "15px", fontSize: "11px" }}>
+                <div style={{ display: "flex", justifyContent: "center", gap: "15px", flexWrap: "wrap", marginBottom: "15px", fontSize: "11px" }}>
+                    <a href="https://github.com/urukaisk-maker/pardo-agenda" target="_blank" rel="noopener noreferrer" style={{ color: "#fff", textDecoration: "none", background: "#333", padding: "4px 10px", borderRadius: "15px" }}>📁 Repositorio del Proyecto</a>
+                    <a href="https://pardo-agenda.netlify.app" target="_blank" rel="noopener noreferrer" style={{ color: "#fff", textDecoration: "none", background: "#333", padding: "4px 10px", borderRadius: "15px" }}>🌐 Sitio en Producción</a>
+                </div>
+                
+                <div style={{ display: "flex", justifyContent: "center", gap: "15px", flexWrap: "wrap", marginBottom: "15px", fontSize: "11px" }}>
                     <Link to="/privacidad" style={{ color: "#888", textDecoration: "none" }}>🔒 Privacidad</Link>
-                    <Link to="/terminos" style={{ color: "#888", textDecoration: "none" }}>📄 Términos de uso</Link>
+                    <Link to="/terminos" style={{ color: "#888", textDecoration: "none" }}>📄 Términos</Link>
                     <Link to="/cookies" style={{ color: "#888", textDecoration: "none" }}>🍪 Cookies</Link>
                 </div>
                 
@@ -29,7 +34,7 @@ function Footer() {
                         <button onClick={() => setShowOwner(false)} style={{ float: "right", background: "none", border: "none", fontSize: "20px", cursor: "pointer" }}>✕</button>
                         <div style={{ fontSize: "50px" }}>👨‍💻</div>
                         <h3 style={{ color: "#667eea" }}>Manuel Casimiro Carrasco</h3>
-                        <p style={{ color: "#666", fontSize: "14px" }}>Desarrollador Web - Reus, Tarragona (España)</p>
+                        <p style={{ color: "#666", fontSize: "13px" }}>Desarrollador Web - Reus, Tarragona (España)</p>
                         <p style={{ fontSize: "13px", lineHeight: "1.7", textAlign: "left" }}>Es un desarrollador web con experiencia. Nuestra visión es tu visión y haremos que esa visión se convierta en realidad.</p>
                     </div>
                 </div>
