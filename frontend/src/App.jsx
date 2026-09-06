@@ -2,6 +2,7 @@ import React from "react";
 import Rachas from "./components/Rachas";
 import DashboardAvanzado from "./components/DashboardAvanzado";
 import RecuperarPassword from "./components/RecuperarPassword";
+import ActivityHeatmap from "./components/ActivityHeatmap";
 import CookieBanner from "./components/CookieBanner";
 import Privacidad from "./components/Privacidad";
 import Terminos from "./components/Terminos";
@@ -288,6 +289,7 @@ function Home({ user, darkMode }) {
                 <div style={{ background: "#FF9800", color: "#fff", padding: "15px", borderRadius: "10px" }}><div style={{ fontSize: "25px", fontWeight: "bold" }}>{diary.length}</div><div style={{ fontSize: "11px" }}>Diario</div></div>
                 <div style={{ background: "#9C27B0", color: "#fff", padding: "15px", borderRadius: "10px" }}><div style={{ fontSize: "25px", fontWeight: "bold" }}>{xp}</div><div style={{ fontSize: "11px" }}>XP</div></div>
             </div>
+            <ActivityHeatmap darkMode={darkMode} />
             <InstallPWA />
         </div>
     );
