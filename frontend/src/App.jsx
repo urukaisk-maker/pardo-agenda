@@ -11,7 +11,7 @@ import Asistente from "./components/Asistente";
 import Navigation from "./components/Navigation";
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from "react-router-dom";
 
-const API = "http://localhost:5000";
+const API = process.env.REACT_APP_API_URL || "https://pardo-backend-3fp6.onrender.com";
 
 // ============ SPLASH SCREEN ============
 function SplashScreen() {
