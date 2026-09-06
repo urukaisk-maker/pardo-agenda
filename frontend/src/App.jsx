@@ -2,6 +2,7 @@ import React from "react";
 import Rachas from "./components/Rachas";
 import DashboardAvanzado from "./components/DashboardAvanzado";
 import RecuperarPassword from "./components/RecuperarPassword";
+import PushManager from "./components/PushManager";
 import ActivityHeatmap from "./components/ActivityHeatmap";
 import CookieBanner from "./components/CookieBanner";
 import Privacidad from "./components/Privacidad";
@@ -44,6 +45,11 @@ function AuthProvider({ children }) {
     const [user, setUser] = React.useState(null);
     const [loading, setLoading] = React.useState(true);
     React.useEffect(() => {
+        if (localStorage.getItem("pardo_guest") === "true") {
+            setUser({ id: "guest", username: "invitado", email: "invitado@pardo.com" });
+            setLoading(false);
+            return;
+        }
         const token = localStorage.getItem("pardo_token");
         if (token) {
             fetch(API + "/api/auth/me", { headers: { Authorization: "Bearer " + token } })
@@ -62,8 +68,14 @@ function AuthProvider({ children }) {
         if (data.token) { localStorage.setItem("pardo_token", data.token); setUser(data.user); return { success: true }; }
         return { success: false, error: data.error || "Error" };
     };
-    const logout = () => { localStorage.removeItem("pardo_token"); setUser(null); };
-    return <AuthContext.Provider value={{ user, login, register, logout, loading }}>{children}</AuthContext.Provider>;
+    const loginAsGuest = () => {
+        setUser({ id: "guest", username: "invitado", email: "invitado@pardo.com" });
+        localStorage.setItem("pardo_guest", "true");
+        localStorage.removeItem("pardo_token");
+    };
+
+    const logout = () => { localStorage.removeItem("pardo_token"); localStorage.removeItem("pardo_guest"); setUser(null); };
+    return <AuthContext.Provider value={{ user, login, register, logout, loginAsGuest, loading }}>{children}</AuthContext.Provider>;
 }
 function useAuth() { return React.useContext(AuthContext); }
 
@@ -93,7 +105,8 @@ function Login() {
                     <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Contraseña" required style={{ width: "100%", padding: "12px", marginBottom: "15px", border: "1px solid #ddd", borderRadius: "5px" }} />
                     <button type="submit" style={{ width: "100%", padding: "12px", background: "#667eea", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer", fontWeight: "bold" }}>Entrar</button>
                 </form>
-                <p style={{ textAlign: "center", marginTop: "15px" }}><Link to="/registro" style={{ color: "#667eea" }}>Registrarse</Link> · <Link to="/recuperar" style={{ color: "#667eea" }}>¿Olvidaste tu contraseña?</Link></p>
+                <p style={{ textAlign: "center", marginTop: "15px" }}><Link to="/registro" style={{ color: "#667eea" }}>Registrarse</Link></p>
+                    <button onClick={loginAsGuest} style={{ width: "100%", padding: "10px", background: "transparent", color: "#667eea", border: "1px solid #667eea", borderRadius: "5px", marginTop: "10px", cursor: "pointer" }}>👤 Probar como invitado</button> · <Link to="/recuperar" style={{ color: "#667eea" }}>¿Olvidaste tu contraseña?</Link></p>
             </div>
         </div>
     );
@@ -641,6 +654,7 @@ function MainApp({ user, logout }) {
         { path: "/servicios", icon: "🔧", name: "Servicios" },
         { path: "/exportar", icon: "📤", name: "Exportar" },
         { path: "/notificaciones", icon: "🔔", name: "Alertas" },
+        { path: "/notificaciones-push", icon: "🔔", name: "Push" },
         { path: "/juego", icon: "🎮", name: "Juego" },
         { path: "/recordatorios", icon: "⏰", name: "Recordatorios" },
         { path: "/idiomas", icon: "🌍", name: "Idiomas" },
@@ -672,6 +686,7 @@ function MainApp({ user, logout }) {
                     <Route path="/estadisticas" element={<Estadisticas />} />
                     <Route path="/servicios" element={<Servicios />} />
                     <Route path="/exportar" element={<Exportar />} />
+                    <Route path="/notificaciones-push" element={<PushManager darkMode={darkMode} />} />
                     <Route path="/notificaciones" element={<Notificaciones />} />
                     <Route path="/juego" element={<MiniJuego />} />
                     <Route path="/recordatorios" element={<Recordatorios />} />
