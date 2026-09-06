@@ -14,13 +14,6 @@ import Navigation from "./components/Navigation";
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from "react-router-dom";
 
 
-const CalendarioLazy = React.lazy(() => import("./components/CalendarioLazy"));
-const DiarioLazy = React.lazy(() => import("./components/DiarioLazy"));
-const HabitosLazy = React.lazy(() => import("./components/HabitosLazy"));
-const NotasLazy = React.lazy(() => import("./components/NotasLazy"));
-const LogrosLazy = React.lazy(() => import("./components/LogrosLazy"));
-const EstadisticasLazy = React.lazy(() => import("./components/EstadisticasLazy"));
-
 const API = process.env.REACT_APP_API_URL || "https://pardo-backend-3fp6.onrender.com";
 
 // ============ SPLASH SCREEN ============
@@ -89,7 +82,7 @@ function useLocalStorage(key, initial) {
 }
 
 function Login() {
-    const { login } = useAuth();
+    const { login, loginAsGuest } = useAuth();
     const navigate = useNavigate();
     const [email, setEmail] = React.useState("");
     const [password, setPassword] = React.useState("");
@@ -105,8 +98,10 @@ function Login() {
                     <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Contraseña" required style={{ width: "100%", padding: "12px", marginBottom: "15px", border: "1px solid #ddd", borderRadius: "5px" }} />
                     <button type="submit" style={{ width: "100%", padding: "12px", background: "#667eea", color: "#fff", border: "none", borderRadius: "5px", cursor: "pointer", fontWeight: "bold" }}>Entrar</button>
                 </form>
-                <p style={{ textAlign: "center", marginTop: "15px" }}><Link to="/registro" style={{ color: "#667eea" }}>Registrarse</Link> · <Link to="/recuperar" style={{ color: "#667eea" }}>¿Olvidaste tu contraseña?</Link></p>
-                    <button onClick={loginAsGuest} style={{ width: "100%", padding: "10px", background: "transparent", color: "#667eea", border: "1px solid #667eea", borderRadius: "5px", marginTop: "10px", cursor: "pointer" }}>👤 Probar como invitado</button>
+                <p style={{ textAlign: "center", marginTop: "15px" }}>
+                    <Link to="/registro" style={{ color: "#667eea" }}>Registrarse</Link> · <Link to="/recuperar" style={{ color: "#667eea" }}>¿Olvidaste tu contraseña?</Link>
+                </p>
+                <button onClick={loginAsGuest} style={{ width: "100%", padding: "10px", background: "transparent", color: "#667eea", border: "1px solid #667eea", borderRadius: "5px", marginTop: "10px", cursor: "pointer" }}>👤 Probar como invitado</button>
             </div>
         </div>
     );
@@ -310,9 +305,7 @@ function Home({ user, darkMode }) {
 
 // ============ CALENDARIO ============
 
-
 // ============ NOTAS CON 12 COLORES E IMÁGENES ============
-
 
 // ============ DIARIO CON GRÁFICO ============
 function Diario() {
