@@ -660,6 +660,53 @@ function Calculadora() {
         </div>
     );
 }
+
+function Buscador({ darkMode }) {
+    const [query, setQuery] = React.useState("");
+    const [results, setResults] = React.useState([]);
+    
+    const allContent = [
+        { type: "Banda", name: "Iron Maiden" },
+        { type: "Banda", name: "Metallica" },
+        { type: "Álbum", name: "Master of Puppets" },
+        { type: "Canción", name: "Enter Sandman" },
+        { type: "Sección", name: "Calendario" },
+        { type: "Sección", name: "Diario" }
+    ];
+    
+    const search = (e) => {
+        setQuery(e.target.value);
+        if (e.target.value.length > 1) {
+            setResults(allContent.filter(item => 
+                item.name.toLowerCase().includes(e.target.value.toLowerCase())
+            ));
+        } else {
+            setResults([]);
+        }
+    };
+    
+    return (
+        <div style={{ position: "relative" }}>
+            <input 
+                type="text" 
+                value={query} 
+                onChange={search} 
+                placeholder="🔍 Buscar..." 
+                style={{ padding: "8px 15px", borderRadius: "20px", border: "1px solid #ddd", fontSize: "12px", width: "150px" }}
+            />
+            {results.length > 0 && (
+                <div style={{ position: "absolute", top: "100%", right: 0, background: "#fff", borderRadius: "10px", boxShadow: "0 4px 8px rgba(0,0,0,0.2)", minWidth: "200px", zIndex: 1000 }}>
+                    {results.map((r, i) => (
+                        <div key={i} style={{ padding: "10px", borderBottom: "1px solid #f0f0f0", cursor: "pointer", fontSize: "13px" }}>
+                            {r.type}: <strong>{r.name}</strong>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
+
 function MainApp({ user, logout }) {
     const [isMobile, setIsMobile] = React.useState(window.innerWidth < 768);
     const [menuOpen, setMenuOpen] = React.useState(false);
