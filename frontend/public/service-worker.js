@@ -1,4 +1,4 @@
-const CACHE_NAME = "pardo-agenda-v2";
+const CACHE_NAME = "pardo-agenda-v3";
 const urlsToCache = [
     "/",
     "/index.html",
@@ -7,90 +7,48 @@ const urlsToCache = [
     "/icons/icon.svg"
 ];
 
-// Instalar Service Worker
 self.addEventListener("install", (event) => {
     event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then((cache) => cache.addAll(urlsToCache))
-            .then(() => self.skipWaiting())
+        caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache)).then(() => self.skipWaiting())
     );
 });
 
-// Activar Service Worker
 self.addEventListener("activate", (event) => {
     event.waitUntil(
-        caches.keys().then((cacheNames) => {
-            return Promise.all(
-                cacheNames.map((cacheName) => {
-                    if (cacheName !== CACHE_NAME) {
-                        return caches.delete(cacheName);
-                    }
-                })
-            );
-        }).then(() => self.clients.claim())
+        caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))).then(() => self.clients.claim())
     );
 });
 
-// Estrategia: Cache first, luego network
 self.addEventListener("fetch", (event) => {
     if (event.request.method !== "GET") return;
-    
-    // API requests: Network first
     if (event.request.url.includes("/api/")) {
-        event.respondWith(
-            fetch(event.request)
-                .then((response) => {
-                    const responseClone = response.clone();
-                    caches.open(CACHE_NAME).then((cache) => {
-                        cache.put(event.request, responseClone);
-                    });
-                    return response;
-                })
-                .catch(() => {
-                    return caches.match(event.request);
-                })
-        );
+        event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
         return;
     }
-    
-    // Static assets: Cache first
     event.respondWith(
-        caches.match(event.request)
-            .then((cachedResponse) => {
-                if (cachedResponse) return cachedResponse;
-                return fetch(event.request).then((response) => {
-                    const responseClone = response.clone();
-                    caches.open(CACHE_NAME).then((cache) => {
-                        cache.put(event.request, responseClone);
-                    });
-                    return response;
-                });
-            })
-            .catch(() => {
-                if (event.request.mode === "navigate") {
-                    return caches.match("/index.html");
-                }
-            })
+        caches.match(event.request).then((cached) => cached || fetch(event.request).then((response) => {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+            return response;
+        }))
     );
 });
 
-// Notificaciones push
+// ============ NOTIFICACIONES PUSH ============
 self.addEventListener("push", (event) => {
+    const data = event.data ? event.data.json() : {};
     const options = {
-        body: event.data ? event.data.text() : "Nueva notificación de Pardo",
+        body: data.body || "Tienes una nueva actualización",
         icon: "/icons/icon.svg",
         badge: "/icons/icon.svg",
-        vibrate: [200, 100, 200]
+        vibrate: [200, 100, 200],
+        data: { url: data.url || "/" }
     };
-    event.waitUntil(
-        self.registration.showNotification("🐕 Pardo Agenda", options)
-    );
+    event.waitUntil(self.registration.showNotification(data.title || "🐕 Pardo Agenda", options));
 });
 
-// Click en notificación
 self.addEventListener("notificationclick", (event) => {
     event.notification.close();
-    event.waitUntil(
-        clients.openWindow("/")
-    );
+    const url = event.notification.data.url || "/";
+    event.waitUntil(clients.openWindow(url));
 });

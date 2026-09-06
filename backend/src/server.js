@@ -146,6 +146,51 @@ app.get("/health", (req, res) => {
     res.json({ status: "OK", service: "Pardo Agenda API", pardo: "🐕" });
 });
 
+
+// ============ PUSH NOTIFICATIONS ============
+const webpush = require("web-push");
+let pushSubscriptions = [];
+
+const vapidKeys = {
+    publicKey: process.env.VAPID_PUBLIC_KEY || "BEl62iM1j1tCqT7jDz4O7f4F4z0z9YJX6q0zB7zC7oJ5K6z5P5tK0V4nM5mZqN2w3w3f5D3t5j5i5v5n5",
+    privateKey: process.env.VAPID_PRIVATE_KEY || "i5cT3Qm8z6jXxE5nR2wW7tY0pL1dK9sH4gU6vB3aQ1o"
+};
+webpush.setVapidDetails(
+    "mailto:urukaisk@gmail.com",
+    vapidKeys.publicKey,
+    vapidKeys.privateKey
+);
+
+app.post("/api/push/subscribe", (req, res) => {
+    const { subscription } = req.body;
+    if (!subscription) return res.status(400).json({ error: "Suscripción requerida" });
+    const existing = pushSubscriptions.find(s => s.endpoint === subscription.endpoint);
+    if (!existing) pushSubscriptions.push(subscription);
+    res.json({ message: "Suscripción guardada", count: pushSubscriptions.length });
+});
+
+app.post("/api/push/unsubscribe", (req, res) => {
+    const { endpoint } = req.body;
+    pushSubscriptions = pushSubscriptions.filter(s => s.endpoint !== endpoint);
+    res.json({ message: "Suscripción eliminada", count: pushSubscriptions.length });
+});
+
+app.post("/api/push/send-test", async (req, res) => {
+    if (pushSubscriptions.length === 0) return res.json({ message: "No hay suscripciones" });
+    const payload = JSON.stringify({
+        title: "🐕 Pardo Agenda",
+        body: "¡Notificación de prueba!",
+        url: "/"
+    });
+    try {
+        await Promise.all(pushSubscriptions.map(sub => webpush.sendNotification(sub, payload)));
+        res.json({ message: `Notificación enviada a ${pushSubscriptions.length} dispositivo(s)` });
+    } catch (err) {
+        console.error("Error enviando push:", err);
+        res.status(500).json({ error: "Error al enviar notificación" });
+    }
+});
+
 app.listen(PORT, () => {
     console.log("🐕 Pardo API running on port " + PORT);
 });
