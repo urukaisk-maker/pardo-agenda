@@ -71,8 +71,8 @@ app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["*"],
-            scriptSrc: ["*", "unsafe-inline", "unsafe-eval"],
-            styleSrc: ["*", "unsafe-inline"],
+            scriptSrc: ["*", "'unsafe-inline'", "'unsafe-eval'"],
+            styleSrc: ["*", "'unsafe-inline'"],
             imgSrc: ["*", "data:", "blob:"]
         }
     }
