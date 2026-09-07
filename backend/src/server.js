@@ -192,7 +192,25 @@ app.post("/api/push/send-test", async (req, res) => {
 });
 
 
-app.get("/api/admin/users", async (req, res) => {
+
+function isAdmin(req, res, next) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: "No autorizado" });
+    const token = authHeader.split(" ")[1];
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || "pardo_secret_key_2024");
+        if (decoded.email !== "admin@pardo.com") {
+            return res.status(403).json({ error: "Requiere permisos de administrador" });
+        }
+        req.userEmail = decoded.email;
+        next();
+    } catch (err) {
+        return res.status(401).json({ error: "Token inválido" });
+    }
+}
+
+
+app.get("/api/admin/users", isAdmin, async (req, res) => {
     try {
         const result = await pool.query("SELECT id, username, email, created_at FROM users ORDER BY created_at DESC");
         res.json({ users: result.rows });
@@ -201,7 +219,7 @@ app.get("/api/admin/users", async (req, res) => {
     }
 });
 
-app.delete("/api/admin/users/:id", async (req, res) => {
+app.delete("/api/admin/users/:id", isAdmin, async (req, res) => {
     const userId = req.params.id;
     const client = await pool.connect();
     try {
@@ -212,6 +230,12 @@ app.delete("/api/admin/users/:id", async (req, res) => {
         await client.query("DELETE FROM diary_entries WHERE user_id = ", [userId]);
         await client.query("DELETE FROM habits WHERE user_id = ", [userId]);
         await client.query("DELETE FROM wishes WHERE user_id = ", [userId]);
+        // Impedir eliminar a admin@pardo.com
+        const adminCheck = await client.query("SELECT email FROM users WHERE id = ", [userId]);
+        if (adminCheck.rows.length > 0 && adminCheck.rows[0].email === "admin@pardo.com") {
+            await client.query("ROLLBACK");
+            return res.status(400).json({ error: "No se puede eliminar la cuenta de administrador" });
+        }
         await client.query("DELETE FROM users WHERE id = ", [userId]);
         await client.query("COMMIT");
         res.json({ message: "Usuario eliminado" });
