@@ -12,22 +12,34 @@ function AdminPanel({ user }) {
         setMessage("");
         const token = localStorage.getItem("pardo_token");
         if (!token) {
-            setMessage("Necesitas iniciar sesion como administrador.");
+            setMessage("No hay sesión. Inicia sesión como admin@pardo.com");
             setLoading(false);
             return;
         }
         try {
-            const response = await fetch(process.env.REACT_APP_API_URL || "https://pardo-backend-3fp6.onrender.com" + "/api/admin/users", {
+            const response = await fetch((process.env.REACT_APP_API_URL || "https://pardo-backend-3fp6.onrender.com") + "/api/admin/users", {
                 headers: { Authorization: "Bearer " + token }
             });
-            const data = await response.json();
-            if (response.ok) {
+            const contentType = response.headers.get("content-type");
+            if (response.status === 401) {
+                setMessage("No autorizado. Asegúrate de ser admin@pardo.com.");
+                setLoading(false);
+                return;
+            }
+            if (response.status === 403) {
+                setMessage("Requiere permisos de administrador.");
+                setLoading(false);
+                return;
+            }
+            if (response.ok && contentType && contentType.includes("application/json")) {
+                const data = await response.json();
                 setUsers(data.users || []);
             } else {
-                setMessage(data.error || "Error al cargar usuarios");
+                const text = await response.text();
+                setMessage("Respuesta no JSON: " + text);
             }
         } catch (err) {
-            setMessage("Error de conexion: " + err.message);
+            setMessage("Error de red: " + err.message);
         }
         setLoading(false);
     };
@@ -38,19 +50,19 @@ function AdminPanel({ user }) {
         if (!window.confirm("Eliminar este usuario?")) return;
         const token = localStorage.getItem("pardo_token");
         try {
-            const response = await fetch(process.env.REACT_APP_API_URL || "https://pardo-backend-3fp6.onrender.com" + "/api/admin/users/" + id, {
+            const response = await fetch((process.env.REACT_APP_API_URL || "https://pardo-backend-3fp6.onrender.com") + "/api/admin/users/" + id, {
                 method: "DELETE",
                 headers: { Authorization: "Bearer " + token }
             });
-            const data = await response.json();
             if (response.ok) {
                 setMessage("Usuario eliminado");
                 loadUsers();
             } else {
-                setMessage(data.error || "Error al eliminar");
+                const text = await response.text();
+                setMessage("Error al eliminar: " + text);
             }
         } catch (err) {
-            setMessage("Error de conexion: " + err.message);
+            setMessage("Error de red: " + err.message);
         }
     };
 
@@ -60,7 +72,7 @@ function AdminPanel({ user }) {
 
     return (
         <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
-            <h2>Panel de Administracion</h2>
+            <h2>Panel de Administración</h2>
             {message && <p style={{ color: "#f44336" }}>{message}</p>}
             {loading ? <p>Cargando...</p> : null}
             {users.length > 0 && (
