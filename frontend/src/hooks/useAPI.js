@@ -6,23 +6,85 @@ function getToken() {
     return localStorage.getItem("pardo_token");
 }
 
+function isOnline() {
+    return navigator.onLine;
+}
+
+function getQueue() {
+    try {
+        return JSON.parse(localStorage.getItem("pardo_offline_queue") || "[]");
+    } catch {
+        return [];
+    }
+}
+
+function setQueue(queue) {
+    localStorage.setItem("pardo_offline_queue", JSON.stringify(queue));
+}
+
+function addToQueue(endpoint, options) {
+    const queue = getQueue();
+    queue.push({ endpoint, options, timestamp: Date.now() });
+    setQueue(queue);
+}
+
 export async function fetchAPI(endpoint, options = {}) {
+    const method = options.method || "GET";
+    if (!isOnline() && method !== "GET") {
+        addToQueue(endpoint, options);
+        console.warn("Offline: operación encolada", endpoint);
+        return { offline: true, queued: true };
+    }
     const token = getToken();
     const headers = {
         "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {})
+        ...(token ? { Authorization: "Bearer " + token } : {})
     };
     try {
-        const response = await fetch(`${API_URL}${endpoint}`, {
+        const response = await fetch(API_URL + endpoint, {
             ...options,
             headers: { ...headers, ...options.headers }
         });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        if (!response.ok) throw new Error("HTTP " + response.status);
         return await response.json();
     } catch (err) {
-        console.warn("API no disponible, usando localStorage", err);
+        if (!isOnline() && method !== "GET") {
+            addToQueue(endpoint, options);
+            return { offline: true, queued: true };
+        }
+        console.warn("API no disponible", err);
         return null;
     }
+}
+
+export function useOnlineStatus() {
+    const [online, setOnline] = React.useState(navigator.onLine);
+    React.useEffect(() => {
+        const handleOnline = () => setOnline(true);
+        const handleOffline = () => setOnline(false);
+        window.addEventListener("online", handleOnline);
+        window.addEventListener("offline", handleOffline);
+        return () => {
+            window.removeEventListener("online", handleOnline);
+            window.removeEventListener("offline", handleOffline);
+        };
+    }, []);
+    return online;
+}
+
+export async function flushOfflineQueue() {
+    const queue = getQueue();
+    if (!queue.length) return;
+    const remaining = [];
+    for (const item of queue) {
+        try {
+            await fetchAPI(item.endpoint, item.options);
+        } catch (err) {
+            console.warn("No se pudo sincronizar:", item.endpoint, err);
+            remaining.push(item);
+        }
+    }
+    setQueue(remaining);
 }
 
 export function registerActivity() {
@@ -41,7 +103,6 @@ export function useSyncStorage(key, initialValue) {
             return initialValue;
         }
     });
-
     React.useEffect(() => {
         const endpoint = key.replace("pardo_", "/api/");
         fetchAPI(endpoint).then(serverData => {
@@ -54,14 +115,12 @@ export function useSyncStorage(key, initialValue) {
             }
         });
     }, [key]);
-
     const updateData = (newData) => {
         setData(newData);
         localStorage.setItem(key, JSON.stringify(newData));
         registerActivity();
     };
-
     return [data, updateData];
 }
 
-export { API_URL };
+export { API_URL, isOnline };
