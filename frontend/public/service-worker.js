@@ -20,6 +20,7 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
+    if (event.request.url.startsWith("file://")) return;
     if (event.request.method !== "GET") return;
     if (event.request.url.includes("/api/")) {
         event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
