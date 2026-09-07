@@ -43,6 +43,7 @@ function AuthProvider({ children }) {
     React.useEffect(() => {
         if (localStorage.getItem("pardo_guest") === "true") {
             setUser({ id: "guest", username: "invitado", email: "invitado@pardo.com" });
+        setLoading(false);
             setLoading(false);
             return;
         }
@@ -66,6 +67,7 @@ function AuthProvider({ children }) {
     };
     const loginAsGuest = () => {
         setUser({ id: "guest", username: "invitado", email: "invitado@pardo.com" });
+        setLoading(false);
         localStorage.setItem("pardo_guest", "true");
         localStorage.removeItem("pardo_token");
     };
