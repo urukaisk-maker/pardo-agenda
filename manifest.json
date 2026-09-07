@@ -1,0 +1,17 @@
+{
+  "name": "Pardo Agenda",
+  "short_name": "Pardo",
+  "description": "Tu mascota virtual te ayuda a organizarte",
+  "start_url": "."
+  "display": "standalone",
+  "background_color": "#667eea",
+  "theme_color": "#667eea",
+  "icons": [
+    {
+      "src": "./icons/icon.svg
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

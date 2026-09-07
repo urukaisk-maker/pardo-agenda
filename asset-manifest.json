@@ -1,0 +1,10 @@
+{
+  "files": {
+    "main.js": "/pardo-agenda/static/js/main.bf2693d6.js",
+    "index.html": "/pardo-agenda/index.html",
+    "main.bf2693d6.js.map": "/pardo-agenda/static/js/main.bf2693d6.js.map"
+  },
+  "entrypoints": [
+    "static/js/main.bf2693d6.js"
+  ]
+}
