@@ -9,6 +9,7 @@ import AdminPanel from "./components/AdminPanel";
 import Diagnostico from "./components/Diagnostico";
 import ProgressCard from "./components/ProgressCard";
 import ActivityHeatmap from "./components/ActivityHeatmap";
+import OfflineBanner from "./components/OfflineBanner";
 import CookieBanner from "./components/CookieBanner";
 import Privacidad from "./components/Privacidad";
 import Terminos from "./components/Terminos";
@@ -722,6 +723,7 @@ function MainApp({ user, logout }) {
                     <Route path="/calculadora" element={<Calculadora darkMode={darkMode} />} />
                 </Routes>
             </div>
+            <OfflineBanner />
             <CookieBanner darkMode={darkMode} />
             <Footer />
         </div>
