@@ -699,7 +699,7 @@ function MainApp({ user, logout }) {
                     <Route path="/estadisticas" element={<Estadisticas />} />
                     <Route path="/servicios" element={<Servicios />} />
                     <Route path="/exportar" element={<Exportar />} />
-                    <Route path="/admin" element={<AdminPanel />} />
+                    <Route path="/admin" element={<AdminPanel user={user} />} />
                     <Route path="/progreso" element={<ProgressCard darkMode={darkMode} />} />
                     <Route path="/notificaciones-push" element={<PushManager darkMode={darkMode} />} />
                     <Route path="/notificaciones" element={<Notificaciones />} />

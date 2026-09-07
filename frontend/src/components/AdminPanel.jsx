@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { fetchAPI } from "../hooks/useAPI";
-import { useAuth } from "../App";
 
-function AdminPanel() {
-    const { user } = useAuth();
+
+function AdminPanel({ user }) {
+    const { user } = props;
     const [users, setUsers] = useState([]);
     const [message, setMessage] = useState("");
 
