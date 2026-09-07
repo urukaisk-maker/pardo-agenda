@@ -1,19 +1,63 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
+const categories = [
+    {
+        name: "Organización",
+        icon: "📋",
+        items: [
+            { path: "/calendario", icon: "📅", name: "Calendario" },
+            { path: "/habitos", icon: "✅", name: "Hábitos" },
+            { path: "/notas", icon: "📝", name: "Notas" },
+            { path: "/deseos", icon: "⭐", name: "Deseos" },
+            { path: "/recordatorios", icon: "⏰", name: "Recordatorios" }
+        ]
+    },
+    {
+        name: "Personal",
+        icon: "👤",
+        items: [
+            { path: "/diario", icon: "📔", name: "Diario" },
+            { path: "/logros", icon: "🏆", name: "Logros" },
+            { path: "/frases", icon: "💬", name: "Frases" },
+            { path: "/idiomas", icon: "🌍", name: "Idiomas" }
+        ]
+    },
+    {
+        name: "Herramientas",
+        icon: "🔧",
+        items: [
+            { path: "/servicios", icon: "🔗", name: "Servicios" },
+            { path: "/calculadora", icon: "🔢", name: "Calculadora" },
+            { path: "/pomodoro", icon: "🍅", name: "Pomodoro" },
+            { path: "/compras", icon: "🛒", name: "Compras" },
+            { path: "/contactos", icon: "📇", name: "Contactos" }
+        ]
+    },
+    {
+        name: "Datos",
+        icon: "📊",
+        items: [
+            { path: "/estadisticas", icon: "📈", name: "Estadísticas" },
+            { path: "/exportar", icon: "📤", name: "Exportar" },
+            { path: "/notificaciones-push", icon: "🔔", name: "Push" },
+            { path: "/progreso", icon: "📸", name: "Progreso" },
+            { path: "/admin", icon: "🛡️", name: "Admin" },
+            { path: "/juego", icon: "🎮", name: "Juego" }
+        ]
+    }
+];
+
 function Navigation({ user, logout, darkMode }) {
-    const [isMobile, setIsMobile] = React.useState(window.innerWidth < 768);
-    const [menuOpen, setMenuOpen] = React.useState(false);
-    const [openCategory, setOpenCategory] = React.useState(null);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    const [menuOpen, setMenuOpen] = useState(false);
+    const [openCategory, setOpenCategory] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [searchResults, setSearchResults] = useState([]);
     const [showSearch, setShowSearch] = useState(false);
     const searchRef = useRef(null);
     const navigate = useNavigate();
-    
-    const location = useLocation();
-    
-    // Lista plana de secciones para búsqueda y atajos
+
     const allSections = [
         { path: "/", name: "Inicio", icon: "🏠" },
         { path: "/calendario", name: "Calendario", icon: "📅" },
@@ -41,8 +85,7 @@ function Navigation({ user, logout, darkMode }) {
         { path: "/recordatorios", name: "Recordatorios", icon: "⏰" },
         { path: "/diagnostico", name: "Diagnóstico", icon: "🧭" }
     ];
-    
-    // Atajos de teclado: Ctrl+1 -> Inicio, Ctrl+2 -> Calendario, etc.
+
     useEffect(() => {
         const handleKeyDown = (e) => {
             if (!e.ctrlKey) return;
@@ -67,23 +110,20 @@ function Navigation({ user, logout, darkMode }) {
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [navigate]);
-    
-    // Filtro de búsqueda
+
     useEffect(() => {
         if (searchTerm.trim() === "") {
             setSearchResults([]);
             setShowSearch(false);
         } else {
             const filtered = allSections.filter(s =>
-                s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                s.icon.includes(searchTerm)
+                s.name.toLowerCase().includes(searchTerm.toLowerCase())
             );
             setSearchResults(filtered);
             setShowSearch(true);
         }
     }, [searchTerm]);
-    
-    // Cerrar búsqueda al hacer clic fuera
+
     useEffect(() => {
         function handleClickOutside(event) {
             if (searchRef.current && !searchRef.current.contains(event.target)) {
@@ -93,17 +133,15 @@ function Navigation({ user, logout, darkMode }) {
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
-    
+
     const textColor = darkMode ? "#fff" : "#333";
     const bgColor = darkMode ? "#111" : "#fff";
     const itemBg = darkMode ? "#333" : "#f8f9fa";
-    
+
     return (
         <nav style={{ background: bgColor, padding: "10px 15px", boxShadow: "0 2px 4px rgba(0,0,0,0.1)", position: "sticky", top: 0, zIndex: 500 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", maxWidth: "1200px", margin: "0 auto" }}>
                 <Link to="/" style={{ fontSize: "20px", fontWeight: "bold", color: "#667eea", textDecoration: "none" }}>🐕 Pardo</Link>
-                
-                {/* Campo de búsqueda global */}
                 <div ref={searchRef} style={{ position: "relative", flex: 1, maxWidth: "300px", margin: "0 10px" }}>
                     <input
                         type="text"
@@ -128,8 +166,7 @@ function Navigation({ user, logout, darkMode }) {
                         </div>
                     )}
                 </div>
-                
-                {/* Menú de categorías (desktop) */}
+
                 {!isMobile && (
                     <div style={{ display: "flex", gap: "5px", flexWrap: "wrap", flex: 1, justifyContent: "center" }}>
                         {categories.map(cat => (
@@ -150,8 +187,7 @@ function Navigation({ user, logout, darkMode }) {
                         ))}
                     </div>
                 )}
-                
-                {/* Usuario y logout */}
+
                 <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
                     {isMobile ? (
                         <button onClick={() => setMenuOpen(!menuOpen)} style={{ fontSize: "26px", background: "none", border: "none", cursor: "pointer", color: textColor }}>{menuOpen ? "✕" : "☰"}</button>
@@ -161,8 +197,7 @@ function Navigation({ user, logout, darkMode }) {
                     {!isMobile && <button onClick={logout} style={{ padding: "5px 10px", background: "#f44336", color: "#fff", border: "none", borderRadius: "15px", cursor: "pointer", fontSize: "11px" }}>Salir</button>}
                 </div>
             </div>
-            
-            {/* Menú móvil desplegable */}
+
             {isMobile && menuOpen && (
                 <div style={{ marginTop: "10px", background: bgColor, borderRadius: "10px", padding: "10px", maxHeight: "70vh", overflowY: "auto" }}>
                     <Link to="/" onClick={() => setMenuOpen(false)} style={{ display: "block", padding: "12px 15px", borderRadius: "8px", textDecoration: "none", color: textColor, background: itemBg, fontSize: "15px", fontWeight: "bold", marginBottom: "5px" }}>🏠 Inicio</Link>
