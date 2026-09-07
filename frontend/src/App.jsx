@@ -104,10 +104,21 @@ function Login() {
                 <p style={{ textAlign: "center", marginTop: "15px" }}>
                     <Link to="/registro" style={{ color: "#667eea" }}>Registrarse</Link> · <Link to="/recuperar" style={{ color: "#667eea" }}>¿Olvidaste tu contraseña?</Link>
                 </p>
-                <button onClick={loginAsGuest} style={{ width: "100%", padding: "10px", background: "transparent", color: "#667eea", border: "1px solid #667eea", borderRadius: "5px", marginTop: "10px", cursor: "pointer" }}>👤 Probar como invitado</button>
+                <button onClick={loginAsGuest} style={{ width: "100%", padding: "14px", background: "#ff6b00", color: "#fff", border: "none", borderRadius: "8px", fontSize: "16px", fontWeight: "bold", marginTop: "15px", cursor: "pointer" }}>👤 Probar como invitado</button>
             </div>
         </div>
     );
+}
+
+
+function InvitadoRedirect() {
+    const { loginAsGuest } = useAuth();
+    const navigate = useNavigate();
+    React.useEffect(() => {
+        loginAsGuest();
+        navigate("/");
+    }, []);
+    return <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>🐕 Entrando como invitado...</div>;
 }
 
 function Register() {
@@ -714,6 +725,7 @@ function App() {
     return (
         <Router>
             <Routes>
+                <Route path="/invitado" element={<InvitadoRedirect />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/registro" element={<Register />} />
                 <Route path="/*" element={user ? <MainApp user={user} logout={logout} /> : <Login />} />
