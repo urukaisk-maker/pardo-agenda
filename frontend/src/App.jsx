@@ -5,6 +5,7 @@ import Rachas from "./components/Rachas";
 import DashboardAvanzado from "./components/DashboardAvanzado";
 import RecuperarPassword from "./components/RecuperarPassword";
 import PushManager from "./components/PushManager";
+import ProgressCard from "./components/ProgressCard";
 import ActivityHeatmap from "./components/ActivityHeatmap";
 import CookieBanner from "./components/CookieBanner";
 import Privacidad from "./components/Privacidad";
@@ -650,6 +651,7 @@ function MainApp({ user, logout }) {
         { path: "/exportar", icon: "📤", name: "Exportar" },
         { path: "/notificaciones", icon: "🔔", name: "Alertas" },
         { path: "/notificaciones-push", icon: "🔔", name: "Push" },
+        { path: "/progreso", icon: "📸", name: "Progreso" },
         { path: "/juego", icon: "🎮", name: "Juego" },
         { path: "/recordatorios", icon: "⏰", name: "Recordatorios" },
         { path: "/idiomas", icon: "🌍", name: "Idiomas" },
@@ -681,6 +683,7 @@ function MainApp({ user, logout }) {
                     <Route path="/estadisticas" element={<Estadisticas />} />
                     <Route path="/servicios" element={<Servicios />} />
                     <Route path="/exportar" element={<Exportar />} />
+                    <Route path="/progreso" element={<ProgressCard darkMode={darkMode} />} />
                     <Route path="/notificaciones-push" element={<PushManager darkMode={darkMode} />} />
                     <Route path="/notificaciones" element={<Notificaciones />} />
                     <Route path="/juego" element={<MiniJuego />} />
