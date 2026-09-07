@@ -54,6 +54,7 @@ function Navigation({ user, logout, darkMode }) {
             items: [
                 { path: "/estadisticas", icon: "📈", name: "Estadísticas" },
                 { path: "/exportar", icon: "📤", name: "Exportar" },
+        { path: "/progreso", icon: "📸", name: "Progreso" },
                 { path: "/notificaciones", icon: "🔔", name: "Alertas" },
                 { path: "/juego", icon: "🎮", name: "Juego" }
             ]

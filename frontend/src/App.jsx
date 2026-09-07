@@ -314,6 +314,7 @@ function Home({ user, darkMode }) {
                 <div style={{ background: "#9C27B0", color: "#fff", padding: "15px", borderRadius: "10px" }}><div style={{ fontSize: "25px", fontWeight: "bold" }}>{xp}</div><div style={{ fontSize: "11px" }}>XP</div></div>
             </div>
             <ActivityHeatmap darkMode={darkMode} />
+            <Link to="/progreso" style={{ display: "inline-block", marginTop: "20px", padding: "15px 30px", background: "#ff6b00", color: "#fff", borderRadius: "25px", textDecoration: "none", fontWeight: "bold" }}>📸 Ir a mi Progreso</Link>
             <InstallPWA />
         </div>
     );
