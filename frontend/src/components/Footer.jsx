@@ -44,7 +44,7 @@ function Footer() {
                     <a href="https://github.com/urukaisk-maker/pardo-agenda" target="_blank" rel="noopener noreferrer" style={{ color: "#fff", textDecoration: "none", background: "#333", padding: "4px 10px", borderRadius: "15px" }}>📁 Repositorio en GitHub</a>
                     <a href="https://pardo-agenda.vercel.app" target="_blank" rel="noopener noreferrer" style={{ color: "#fff", textDecoration: "none", background: "#333", padding: "4px 10px", borderRadius: "15px" }}>🌐 Producción</a>
                 </div>
-                <p style={{ fontSize: "10px", color: "#666", margin: 0 }}>© {new Date().getFullYear()} Pardo Agenda - Manuel Casimiro Carrasco - Reus, Tarragona (España)</p>
+                <p style={{ fontSize: "10px", color: "#666", margin: 0 }}>© {new Date().getFullYear()}  Pardo Agenda - Manuel Casimiro Carrasco - Reus, Tarragona (España)</p>
             </div>
 
             {showOwner && (
