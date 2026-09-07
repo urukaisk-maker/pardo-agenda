@@ -208,6 +208,29 @@ app.get("/", (req, res) => {
     res.json({ message: "🐕 Pardo Agenda API" });
 });
 
+
+app.get("/api/admin/stats", isAdmin, async (req, res) => {
+    try {
+        const users = await pool.query("SELECT COUNT(*) FROM users");
+        const tasks = await pool.query("SELECT COUNT(*) FROM tasks");
+        const notes = await pool.query("SELECT COUNT(*) FROM notes");
+        const diary = await pool.query("SELECT COUNT(*) FROM diary_entries");
+        const habits = await pool.query("SELECT COUNT(*) FROM habits");
+        const wishes = await pool.query("SELECT COUNT(*) FROM wishes");
+        res.json({
+            users: parseInt(users.rows[0].count),
+            tasks: parseInt(tasks.rows[0].count),
+            notes: parseInt(notes.rows[0].count),
+            diary: parseInt(diary.rows[0].count),
+            habits: parseInt(habits.rows[0].count),
+            wishes: parseInt(wishes.rows[0].count)
+        });
+    } catch (err) {
+        console.error("Stats error:", err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.listen(PORT, () => {
     console.log("🐕 Pardo API running on port " + PORT);
 });
