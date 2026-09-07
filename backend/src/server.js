@@ -10,63 +10,12 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ============ RATE LIMITING ============
-const rateLimit = new Map();
-const RATE_WINDOW = 15 * 60 * 1000; // 15 minutos
-const MAX_REQUESTS = 100;
-
-function rateLimiter(req, res, next) {
-    const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress || "unknown";
-    const now = Date.now();
-    
-    if (!rateLimit.has(ip)) {
-        rateLimit.set(ip, { count: 1, resetAt: now + RATE_WINDOW });
-        return next();
-    }
-    
-    const data = rateLimit.get(ip);
-    if (now > data.resetAt) {
-        data.count = 1;
-        data.resetAt = now + RATE_WINDOW;
-        return next();
-    }
-    
-    if (data.count >= MAX_REQUESTS) {
-        return res.status(429).json({ error: "Demasiadas solicitudes. Intenta más tarde." });
-    }
-    
-    data.count++;
-    next();
-}
-
-// ============ VALIDACIÓN DE INPUTS ============
-function validateLogin(req, res, next) {
-    const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ error: "Email y contraseña requeridos" });
-    if (typeof email !== "string" || typeof password !== "string") return res.status(400).json({ error: "Formato inválido" });
-    if (email.length > 100) return res.status(400).json({ error: "Email demasiado largo" });
-    if (password.length < 6 || password.length > 100) return res.status(400).json({ error: "Contraseña inválida" });
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) return res.status(400).json({ error: "Email inválido" });
-    next();
-}
-
-function validateRegister(req, res, next) {
-    const { username, email, password } = req.body;
-    if (!username || !email || !password) return res.status(400).json({ error: "Todos los campos requeridos" });
-    if (username.length < 2 || username.length > 50) return res.status(400).json({ error: "Usuario inválido" });
-    if (password.length < 6) return res.status(400).json({ error: "Contraseña muy corta (mín 6)" });
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) return res.status(400).json({ error: "Email inválido" });
-    next();
-}
-
-const apiRoutes = require("./routes/api.routes");
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false }
 });
 
+// ==================== MIDDLEWARES ====================
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
@@ -80,16 +29,94 @@ app.use(helmet({
 app.use(cors({ origin: "*" }));
 app.use(morgan("dev"));
 app.use(express.json({ limit: "100kb" }));
-app.use("/api", apiRoutes);
 
-// Login con rate limiting y validación
-app.post("/api/auth/login", rateLimiter, validateLogin, async (req, res) => {
+// ==================== INICIALIZAR TABLAS ====================
+async function initDB() {
+    try {
+        await pool.query("CREATE EXTENSION IF NOT EXISTS pgcrypto;");
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS users (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                username VARCHAR(50) UNIQUE NOT NULL,
+                email VARCHAR(100) UNIQUE NOT NULL,
+                password_hash VARCHAR(255) NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+            CREATE TABLE IF NOT EXISTS tasks (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+                title VARCHAR(200) NOT NULL,
+                due_date DATE,
+                completed BOOLEAN DEFAULT false,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+            CREATE TABLE IF NOT EXISTS notes (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+                text TEXT,
+                color VARCHAR(7),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+            CREATE TABLE IF NOT EXISTS diary_entries (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+                title VARCHAR(200),
+                content TEXT,
+                mood VARCHAR(20),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+            CREATE TABLE IF NOT EXISTS habits (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+                name VARCHAR(100),
+                icon VARCHAR(10),
+                days JSONB,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+            CREATE TABLE IF NOT EXISTS wishes (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+                text VARCHAR(200),
+                category VARCHAR(20),
+                done BOOLEAN DEFAULT false,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+        console.log("✅ Tablas listas");
+    } catch (err) {
+        console.error("Error initDB:", err.message);
+    }
+}
+initDB();
+
+// ==================== AUTH ROUTES ====================
+app.post("/api/auth/register", async (req, res) => {
+    const { username, email, password } = req.body;
+    if (!username || !email || !password) return res.status(400).json({ error: "Todos los campos requeridos" });
+    if (password.length < 6) return res.status(400).json({ error: "Contraseña muy corta" });
+    try {
+        const existing = await pool.query("SELECT id FROM users WHERE email = $1 OR username = $2", [email, username]);
+        if (existing.rows.length > 0) return res.status(400).json({ error: "Usuario o email ya existe" });
+        const hashed = bcrypt.hashSync(password, 10);
+        const result = await pool.query(
+            "INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3) RETURNING id, username, email",
+            [username, email, hashed]
+        );
+        const user = result.rows[0];
+        const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET || "pardo_secret_key_2024", { expiresIn: "7d" });
+        res.status(201).json({ message: "Registrado", token, user });
+    } catch (err) {
+        console.error("Register error:", err);
+        res.status(500).json({ error: "Error interno: " + err.message });
+    }
+});
+
+app.post("/api/auth/login", async (req, res) => {
     const { email, password } = req.body;
+    if (!email || !password) return res.status(400).json({ error: "Email y contraseña requeridos" });
     try {
         const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
-        if (result.rows.length === 0) {
-            return res.status(401).json({ error: "Credenciales inválidas" });
-        }
+        if (result.rows.length === 0) return res.status(401).json({ error: "Credenciales inválidas" });
         const user = result.rows[0];
         let valid = false;
         if (user.password_hash.startsWith("$2a$") || user.password_hash.startsWith("$2b$")) {
@@ -103,28 +130,8 @@ app.post("/api/auth/login", rateLimiter, validateLogin, async (req, res) => {
         const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET || "pardo_secret_key_2024", { expiresIn: "7d" });
         res.json({ message: "Login exitoso", token, user: { id: user.id, username: user.username, email: user.email } });
     } catch (err) {
-        console.error("Login error:", err.message);
-        res.status(500).json({ error: "Error interno" });
-    }
-});
-
-// Register con validación
-app.post("/api/auth/register", rateLimiter, validateRegister, async (req, res) => {
-    const { username, email, password } = req.body;
-    try {
-        const existing = await pool.query("SELECT id FROM users WHERE email = $1 OR username = $2", [email, username]);
-        if (existing.rows.length > 0) return res.status(400).json({ error: "Usuario o email ya existe" });
-        const hashed = bcrypt.hashSync(password, 10);
-        const result = await pool.query(
-            "INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3) RETURNING id, username, email",
-            [username, email, hashed]
-        );
-        const user = result.rows[0];
-        const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET || "pardo_secret_key_2024", { expiresIn: "7d" });
-        res.status(201).json({ message: "Registrado", token, user });
-    } catch (err) {
-        console.error("Register error:", err.message);
-        res.status(500).json({ error: "Error interno" });
+        console.error("Login error:", err);
+        res.status(500).json({ error: "Error interno: " + err.message });
     }
 });
 
@@ -135,64 +142,14 @@ app.get("/api/auth/me", async (req, res) => {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET || "pardo_secret_key_2024");
         const result = await pool.query("SELECT id, username, email FROM users WHERE id = $1", [decoded.id]);
-        if (result.rows.length === 0) return res.status(404).json({ error: "No encontrado" });
+        if (result.rows.length === 0) return res.status(404).json({ error: "Usuario no encontrado" });
         res.json({ user: result.rows[0] });
     } catch (err) {
         res.status(401).json({ error: "Token inválido" });
     }
 });
 
-app.get("/health", (req, res) => {
-    res.json({ status: "OK", service: "Pardo Agenda API", pardo: "🐕" });
-});
-
-
-// ============ PUSH NOTIFICATIONS ============
-const webpush = require("web-push");
-let pushSubscriptions = [];
-
-const vapidKeys = {
-    publicKey: process.env.VAPID_PUBLIC_KEY || "BLSvMpGvLrhbuNlAL8BfQOFCmrkli6zwnKb-2vEybyqpA1zNZDr4BXqgzWbH_nysoPw4SN1Gth7i-bacLbap7iY",
-    privateKey: process.env.VAPID_PRIVATE_KEY || "FTMJrvyUZWHPs35-pIaV2M9FItQe59YetdY49GVXCZU"
-};
-webpush.setVapidDetails(
-    "mailto:urukaisk@gmail.com",
-    vapidKeys.publicKey,
-    vapidKeys.privateKey
-);
-
-app.post("/api/push/subscribe", (req, res) => {
-    const { subscription } = req.body;
-    if (!subscription) return res.status(400).json({ error: "Suscripción requerida" });
-    const existing = pushSubscriptions.find(s => s.endpoint === subscription.endpoint);
-    if (!existing) pushSubscriptions.push(subscription);
-    res.json({ message: "Suscripción guardada", count: pushSubscriptions.length });
-});
-
-app.post("/api/push/unsubscribe", (req, res) => {
-    const { endpoint } = req.body;
-    pushSubscriptions = pushSubscriptions.filter(s => s.endpoint !== endpoint);
-    res.json({ message: "Suscripción eliminada", count: pushSubscriptions.length });
-});
-
-app.post("/api/push/send-test", async (req, res) => {
-    if (pushSubscriptions.length === 0) return res.json({ message: "No hay suscripciones" });
-    const payload = JSON.stringify({
-        title: "🐕 Pardo Agenda",
-        body: "¡Notificación de prueba!",
-        url: "/"
-    });
-    try {
-        await Promise.all(pushSubscriptions.map(sub => webpush.sendNotification(sub, payload)));
-        res.json({ message: `Notificación enviada a ${pushSubscriptions.length} dispositivo(s)` });
-    } catch (err) {
-        console.error("Error enviando push:", err);
-        res.status(500).json({ error: "Error al enviar notificación" });
-    }
-});
-
-
-
+// ==================== ADMIN MIDDLEWARE ====================
 function isAdmin(req, res, next) {
     const authHeader = req.headers.authorization;
     if (!authHeader) return res.status(401).json({ error: "No autorizado" });
@@ -209,12 +166,13 @@ function isAdmin(req, res, next) {
     }
 }
 
-
+// ==================== ADMIN ROUTES ====================
 app.get("/api/admin/users", isAdmin, async (req, res) => {
     try {
         const result = await pool.query("SELECT id, username, email, created_at FROM users ORDER BY created_at DESC");
         res.json({ users: result.rows });
     } catch (err) {
+        console.error("Admin users error:", err);
         res.status(500).json({ error: err.message });
     }
 });
@@ -224,28 +182,30 @@ app.delete("/api/admin/users/:id", isAdmin, async (req, res) => {
     const client = await pool.connect();
     try {
         await client.query("BEGIN");
-        // Eliminar registros dependientes (si existen tablas hijas sin CASCADE)
-        await client.query("DELETE FROM tasks WHERE user_id = ", [userId]);
-        await client.query("DELETE FROM notes WHERE user_id = ", [userId]);
-        await client.query("DELETE FROM diary_entries WHERE user_id = ", [userId]);
-        await client.query("DELETE FROM habits WHERE user_id = ", [userId]);
-        await client.query("DELETE FROM wishes WHERE user_id = ", [userId]);
-        // Impedir eliminar a admin@pardo.com
-        const adminCheck = await client.query("SELECT email FROM users WHERE id = ", [userId]);
-        if (adminCheck.rows.length > 0 && adminCheck.rows[0].email === "admin@pardo.com") {
-            await client.query("ROLLBACK");
-            return res.status(400).json({ error: "No se puede eliminar la cuenta de administrador" });
-        }
-        await client.query("DELETE FROM users WHERE id = ", [userId]);
+        await client.query("DELETE FROM tasks WHERE user_id = $1", [userId]);
+        await client.query("DELETE FROM notes WHERE user_id = $1", [userId]);
+        await client.query("DELETE FROM diary_entries WHERE user_id = $1", [userId]);
+        await client.query("DELETE FROM habits WHERE user_id = $1", [userId]);
+        await client.query("DELETE FROM wishes WHERE user_id = $1", [userId]);
+        await client.query("DELETE FROM users WHERE id = $1", [userId]);
         await client.query("COMMIT");
         res.json({ message: "Usuario eliminado" });
     } catch (err) {
         await client.query("ROLLBACK");
-        console.error("Error deleting user:", err);
+        console.error("Delete user error:", err);
         res.status(500).json({ error: "Error al eliminar: " + err.message });
     } finally {
         client.release();
     }
+});
+
+// ==================== HEALTH ====================
+app.get("/health", (req, res) => {
+    res.json({ status: "OK", service: "Pardo Agenda API", pardo: "🐕" });
+});
+
+app.get("/", (req, res) => {
+    res.json({ message: "🐕 Pardo Agenda API" });
 });
 
 app.listen(PORT, () => {
