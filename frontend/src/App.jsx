@@ -1,4 +1,6 @@
 import React from "react";
+import Notas from "./components/Notas";
+import Calendario from "./components/Calendario";
 import Rachas from "./components/Rachas";
 import DashboardAvanzado from "./components/DashboardAvanzado";
 import RecuperarPassword from "./components/RecuperarPassword";
