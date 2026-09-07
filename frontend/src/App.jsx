@@ -6,6 +6,7 @@ import DashboardAvanzado from "./components/DashboardAvanzado";
 import RecuperarPassword from "./components/RecuperarPassword";
 import PushManager from "./components/PushManager";
 import AdminPanel from "./components/AdminPanel";
+import Diagnostico from "./components/Diagnostico";
 import ProgressCard from "./components/ProgressCard";
 import ActivityHeatmap from "./components/ActivityHeatmap";
 import CookieBanner from "./components/CookieBanner";
@@ -699,6 +700,7 @@ function MainApp({ user, logout }) {
                     <Route path="/estadisticas" element={<Estadisticas />} />
                     <Route path="/servicios" element={<Servicios />} />
                     <Route path="/exportar" element={<Exportar />} />
+                    <Route path="/diagnostico" element={<Diagnostico />} />
                     <Route path="/admin" element={<AdminPanel user={user} />} />
                     <Route path="/progreso" element={<ProgressCard darkMode={darkMode} />} />
                     <Route path="/notificaciones-push" element={<PushManager darkMode={darkMode} />} />
