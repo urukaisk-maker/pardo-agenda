@@ -202,11 +202,25 @@ app.get("/api/admin/users", async (req, res) => {
 });
 
 app.delete("/api/admin/users/:id", async (req, res) => {
+    const userId = req.params.id;
+    const client = await pool.connect();
     try {
-        await pool.query("DELETE FROM users WHERE id = ", [req.params.id]);
+        await client.query("BEGIN");
+        // Eliminar registros dependientes (si existen tablas hijas sin CASCADE)
+        await client.query("DELETE FROM tasks WHERE user_id = ", [userId]);
+        await client.query("DELETE FROM notes WHERE user_id = ", [userId]);
+        await client.query("DELETE FROM diary_entries WHERE user_id = ", [userId]);
+        await client.query("DELETE FROM habits WHERE user_id = ", [userId]);
+        await client.query("DELETE FROM wishes WHERE user_id = ", [userId]);
+        await client.query("DELETE FROM users WHERE id = ", [userId]);
+        await client.query("COMMIT");
         res.json({ message: "Usuario eliminado" });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        await client.query("ROLLBACK");
+        console.error("Error deleting user:", err);
+        res.status(500).json({ error: "Error al eliminar: " + err.message });
+    } finally {
+        client.release();
     }
 });
 
