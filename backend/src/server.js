@@ -191,6 +191,25 @@ app.post("/api/push/send-test", async (req, res) => {
     }
 });
 
+
+app.get("/api/admin/users", async (req, res) => {
+    try {
+        const result = await pool.query("SELECT id, username, email, created_at FROM users ORDER BY created_at DESC");
+        res.json({ users: result.rows });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.delete("/api/admin/users/:id", async (req, res) => {
+    try {
+        await pool.query("DELETE FROM users WHERE id = ", [req.params.id]);
+        res.json({ message: "Usuario eliminado" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.listen(PORT, () => {
     console.log("🐕 Pardo API running on port " + PORT);
 });
